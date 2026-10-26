@@ -33,7 +33,7 @@ values.
 | `--muted-foreground` | `#8a8a8a` | `#585858` | Labels and secondary text.                 |
 | `--accent`           | `#ffffff` | `#000000` | The highlighted combobox option.           |
 | `--destructive`      | `#ff6666` | `#b91c1c` | Remove buttons and errors.                 |
-| `--border`           | `#3a3a3a` | `#e4e4e4` | The 1 px rules.                            |
+| `--border`           | `#3a3a3a` | `#e4e4e4` | The 1 px rules, the canvas outline.        |
 | `--border-strong`    | `#585858` | `#c6c6c6` | The outline button at rest.                |
 | `--input`, `--ring`  | `#585858` | `#c6c6c6`, `#8a8a8a` | Inputs and focus rings.         |
 

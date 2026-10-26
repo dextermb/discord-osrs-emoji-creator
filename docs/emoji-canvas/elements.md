@@ -15,6 +15,9 @@ rectangle: their sources, placement and style. Back to
   `#000000`.
 - The canvas has no ground of its own. Where the emoji is transparent, the
   black page shows through.
+- A faint 1 px dashed outline (`--border`) shows the edges of the canvas. It
+  is a CSS outline on the `<svg>`, outside the canvas box, so it is not part
+  of the emoji and does not cover the edge pixels.
 
 ## Background image
 
