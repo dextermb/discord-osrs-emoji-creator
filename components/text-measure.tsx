@@ -4,12 +4,15 @@ import { useEffect, useLayoutEffect, useRef, useState, type Dispatch } from "rea
 
 import { TEXT_ATTRIBUTES } from "@/components/emoji-artwork"
 import type { EditorAction } from "@/lib/editor"
+import { textFontStyle, type TextFont } from "@/lib/fonts"
 
 export function TextMeasure({
   value,
+  font,
   dispatch,
 }: {
   value: string
+  font: TextFont
   dispatch: Dispatch<EditorAction>
 }) {
   const textRef = useRef<SVGTextElement>(null)
@@ -33,7 +36,7 @@ export function TextMeasure({
         height: measured?.height ?? 0,
       },
     })
-  }, [value, fontEpoch, dispatch])
+  }, [value, font, fontEpoch, dispatch])
 
   return (
     <svg
@@ -42,7 +45,7 @@ export function TextMeasure({
       height={0}
       className="pointer-events-none invisible absolute font-sans"
     >
-      <text ref={textRef} {...TEXT_ATTRIBUTES}>
+      <text ref={textRef} {...TEXT_ATTRIBUTES} style={textFontStyle(font)}>
         {value}
       </text>
     </svg>

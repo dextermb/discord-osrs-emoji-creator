@@ -4,12 +4,14 @@ import { useId, type Dispatch } from "react"
 import { Trash2Icon } from "lucide-react"
 
 import { BackgroundField } from "@/components/background-field"
+import { FontField } from "@/components/font-field"
 import { IconPicker } from "@/components/icon-picker"
 import { PanelHeading } from "@/components/panel-heading"
 import { ShapeControls } from "@/components/shape-controls"
 import { Button } from "@/components/ui/button"
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import type { FontStatus } from "@/hooks/use-text-font"
 import {
   rectInsets,
   type EditorAction,
@@ -30,10 +32,12 @@ const TITLES: Record<Selection, string> = {
 export function LayerPanel({
   state,
   dispatch,
+  fontStatus,
   initialCategorySlug,
 }: {
   state: EditorState
   dispatch: Dispatch<EditorAction>
+  fontStatus: FontStatus
   initialCategorySlug: string | null
 }) {
   const { selection } = state
@@ -54,14 +58,15 @@ export function LayerPanel({
             onAssetChange={(asset) => dispatch({ type: "selectAsset", asset })}
           />
         </FieldGroup>
-        <div hidden={selection !== "text"}>
+        <FieldGroup hidden={selection !== "text"}>
           <TextField
             value={state.text.value}
             onValueChange={(value) => dispatch({ type: "setText", value })}
             colour={state.text.colour}
             onColourChange={(colour) => dispatch({ type: "setTextColour", colour })}
           />
-        </div>
+          <FontField font={state.text.font} status={fontStatus} dispatch={dispatch} />
+        </FieldGroup>
         <div hidden={selection !== "rect"}>
           <ShapeControls
             rect={state.rect}

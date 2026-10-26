@@ -1,3 +1,4 @@
+import { DEFAULT_TEXT_FONT, type TextFont } from "@/lib/fonts"
 import type { IconAsset } from "@/lib/osrsclans"
 import {
   fitScale,
@@ -46,7 +47,7 @@ export type EditorState = {
   asset: IconAsset | null
   icon: Placement
   iconBasis: Size | null
-  text: { value: string; box: Box; placement: Placement; colour: string }
+  text: { value: string; box: Box; placement: Placement; colour: string; font: TextFont }
   background: Background | null
   canvasColour: string | null
   split: boolean
@@ -59,6 +60,8 @@ export type EditorAction =
   | { type: "selectAsset"; asset: IconAsset | null }
   | { type: "setText"; value: string }
   | { type: "setTextColour"; colour: string }
+  | { type: "setTextFont"; font: TextFont }
+  | { type: "setFontWeight"; weight: number }
   | { type: "setCanvasColour"; colour: string | null }
   | { type: "setSplit"; split: boolean }
   | { type: "textMeasured"; box: Box }
@@ -130,6 +133,7 @@ export function initialEditorState(asset: IconAsset | null): EditorState {
         rotation: 0,
       },
       colour: DEFAULT_TEXT_COLOUR,
+      font: DEFAULT_TEXT_FONT,
     },
     background: null,
     canvasColour: null,
@@ -243,6 +247,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, text: { ...state.text, value: action.value } }
     case "setTextColour":
       return { ...state, text: { ...state.text, colour: action.colour } }
+    case "setTextFont":
+      return { ...state, text: { ...state.text, font: action.font } }
+    case "setFontWeight": {
+      const { font } = state.text
+      if (font.source !== "google" || !font.weights.includes(action.weight)) return state
+      return { ...state, text: { ...state.text, font: { ...font, weight: action.weight } } }
+    }
     case "setCanvasColour":
       return { ...state, canvasColour: action.colour }
     case "setSplit":

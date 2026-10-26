@@ -15,7 +15,8 @@ EditorState
   asset:      IconAsset | null             sprite or item, see icon-picker.md
   icon:       Placement
   iconBasis:  { width, height } | null    natural size of the last icon
-  text:         { value, box: Box, placement: Placement, colour }
+  text:         { value, box: Box, placement: Placement, colour,
+                  font: TextFont }         see fonts.md
   background:   { dataUri, name } | null
   canvasColour: string | null              null = transparent
   split:        boolean                    cut into 128 px sections, see preview.md
@@ -26,6 +27,7 @@ EditorState
 
 ```
 EmojiEditor ── useReducer(editorReducer) ──▶ state
+  ├─ useTextFont(text.font) ─────────────────▶ fontStatus, see fonts.md
   ├─ TextMeasure: hidden <text> getBBox ─────▶ textMeasured
   ├─ tab "Canvas":  EmojiCanvas
   │    ├─ EmojiArtwork                         the layers, see below
@@ -41,6 +43,7 @@ EmojiEditor ── useReducer(editorReducer) ──▶ state
   ├─ LayerPanel                                one panel for the selection
   │    ├─ IconPicker ────────────────────────▶ selectAsset
   │    ├─ TextField ─────────────────────────▶ setText, setTextColour
+  │    ├─ FontField ─────────────────────────▶ setTextFont, setFontWeight
   │    ├─ ShapeControls ─────────────────────▶ addRect, removeRect, setRectStyle,
   │    │                                        setRectInsets
   │    ├─ CanvasColourField ─────────────────▶ setCanvasColour

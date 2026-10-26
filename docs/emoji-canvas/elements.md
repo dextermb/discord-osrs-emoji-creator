@@ -136,10 +136,11 @@ bottom = 128 - (cy + height / 2)
 
 ## Text style
 
-The text uses Geist, 48 px, bold. The interface font is Geist Mono, so the
-`<svg>` sets `font-sans`. See [theme.md](../theme.md). `TEXT_ATTRIBUTES` in
-`components/emoji-artwork.tsx` holds the font values, so the artwork and the
-measurement use the same font.
+The text is 48 px. The default font is Jim Nightshade at 400. The user can
+select a Google font and its weight, or upload a font. See
+[fonts.md](./fonts.md). `TEXT_ATTRIBUTES` in `components/emoji-artwork.tsx`
+holds the size and the alignment, and `textFontStyle` gives the font. The
+artwork and the measurement use both, so they use the same font.
 
 The colour input at the left of the "Text" input sets `text.colour`. The
 default is `#ffffff`.
