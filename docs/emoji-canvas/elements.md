@@ -1,15 +1,20 @@
 # Emoji canvas: elements
 
-The canvas colour, the background image, the icon, the text and the
-rectangle: their sources, placement and style. Back to
+The canvas (its colour, background image and padding), the icon, the text
+and the rectangle: their sources, placement and style. Back to
 [emoji-canvas.md](../emoji-canvas.md).
 
-## Canvas colour
+## Canvas
 
-- The "Canvas colour" input is in the "Background" panel, above the image.
+The "Canvas" layer is the last row of the "Layers" list. Its panel holds, from
+the top: "Canvas colour", "Background image" and "Padding (px)". The row shows
+the canvas size, for example "192 × 128 px".
+
+### Canvas colour
+
 - The default is no colour, so the emoji is transparent. A transparent emoji
   looks correct on every Discord theme.
-- A colour fills the full canvas below all layers. It does not clip to the
+- A colour fills the full canvas, padding included, below all layers. It does not clip to the
   rectangle (the background image does).
 - "Remove" sets the colour back to none. With no colour, the input shows
   `#000000`.
@@ -19,7 +24,7 @@ rectangle: their sources, placement and style. Back to
   is a CSS outline on the `<svg>`, outside the canvas box, so it is not part
   of the emoji and does not cover the edge pixels.
 
-## Background image
+### Background image
 
 - The user picks a file in the "Background image" input (`accept="image/*"`).
 - `readImageAsDataUri` draws the image on a canvas with a maximum height of
@@ -29,7 +34,26 @@ rectangle: their sources, placement and style. Back to
   and makes a later download large. An animated GIF becomes a still image.
 - The image fills the canvas with "cover" (`preserveAspectRatio="xMidYMid
   slice"`). When the canvas width changes, the image fills the new width.
+  The image also fills the padding.
 - If the browser cannot read the file as an image, the field shows an error.
+
+### Padding
+
+The "Left" and "Right" inputs add empty canvas at each side of the content.
+For the geometry, see "Canvas size" in [state.md](./state.md).
+
+- The values are whole pixels from 0 to 256. The reducer rounds and clamps
+  them. The default is 0.
+- There is no top or bottom padding. A Discord emoji is 128 px high, so top
+  and bottom padding would make the content smaller.
+- The padding does not move the elements. The `viewBox` starts at
+  `-padding.left`, so on the screen the content moves to the right.
+- The canvas colour and the background image fill the padding. The icon and
+  the text can go into the padding and stay visible.
+- On the "Canvas" tab, a faint 1 px dashed line (`--border`) shows each edge of
+  the content area, if the padding on that side is more than 0. The lines are
+  0.5 px into the padding, so they do not cover content pixels. They are not
+  in the artwork, so the preview and the export do not show them.
 
 ## The icon is a data URI
 
@@ -117,6 +141,7 @@ without the grab handles.
   or a rotation changes them.
 - The insets describe the rectangle before rotation. A new inset changes the
   centre and the size, and the rotation stays.
+- The insets refer to the content area, not to the padded canvas.
 - "Right" refers to the canvas width without the rectangle (`contentWidth`).
   The rectangle pushes the canvas width, so the full width would change when
   "Right" changes.

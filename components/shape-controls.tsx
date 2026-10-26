@@ -1,8 +1,9 @@
 "use client"
 
-import { useId, useState, type Dispatch } from "react"
+import { useId, type Dispatch } from "react"
 import { SquarePlusIcon, Trash2Icon } from "lucide-react"
 
+import { NumberField } from "@/components/number-field"
 import { Button } from "@/components/ui/button"
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -163,44 +164,6 @@ function SliderField({
           {value} {unit}
         </span>
       </div>
-    </Field>
-  )
-}
-
-function NumberField({
-  label,
-  value,
-  onValueChange,
-}: {
-  label: string
-  value: number
-  onValueChange: (value: number) => void
-}) {
-  const id = useId()
-  const [draft, setDraft] = useState<string | null>(null)
-  const draftNumber = draft === null || draft.trim() === "" ? NaN : Number(draft)
-  const draftIsCurrent =
-    draft !== null &&
-    (!Number.isFinite(draftNumber) ||
-      Math.round(draftNumber) === Math.round(value))
-
-  return (
-    <Field>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <Input
-        id={id}
-        type="number"
-        inputMode="numeric"
-        step={1}
-        value={draftIsCurrent ? draft : String(Math.round(value))}
-        onChange={(event) => {
-          const text = event.target.value
-          setDraft(text)
-          const next = Number(text)
-          if (text.trim() !== "" && Number.isFinite(next)) onValueChange(next)
-        }}
-        onBlur={() => setDraft(null)}
-      />
     </Field>
   )
 }

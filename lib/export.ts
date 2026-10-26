@@ -94,7 +94,7 @@ export async function canEncode(type: string) {
   return blob.type === type
 }
 
-async function svgToCanvas(svg: string, width: number, text: ExportText | null) {
+async function svgToCanvas(svg: string, box: Section, text: ExportText | null) {
   const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }))
   try {
     const image = new Image()
@@ -102,19 +102,24 @@ async function svgToCanvas(svg: string, width: number, text: ExportText | null) 
     await image.decode()
 
     const canvas = document.createElement("canvas")
-    canvas.width = width
+    canvas.width = box.width
     canvas.height = CANVAS_HEIGHT
     const context = canvas.getContext("2d")
     if (!context) throw new Error("Canvas 2D is not available")
-    context.drawImage(image, 0, 0, width, CANVAS_HEIGHT)
-    if (text) drawText(context, text)
+    context.drawImage(image, 0, 0, box.width, CANVAS_HEIGHT)
+    if (text) {
+      context.translate(-box.x, 0)
+      drawText(context, text)
+    }
     return canvas
   } finally {
     URL.revokeObjectURL(url)
   }
 }
 
-function cropSection(source: HTMLCanvasElement, { x, width }: Section) {
+function cropSection(source: HTMLCanvasElement, box: Section, section: Section) {
+  const x = section.x - box.x
+  const { width } = section
   const canvas = document.createElement("canvas")
   canvas.width = width
   canvas.height = CANVAS_HEIGHT
@@ -128,12 +133,12 @@ function cropSection(source: HTMLCanvasElement, { x, width }: Section) {
 export async function exportFiles(
   svg: string,
   text: ExportText | null,
-  width: number,
+  box: Section,
   splitSections: Section[],
   format: ExportFormat
 ) {
   const type = formatType(format)
-  const full = await svgToCanvas(svg, width, text)
+  const full = await svgToCanvas(svg, box, text)
   const toFile = async (canvas: HTMLCanvasElement, name: string): Promise<ExportFile> => ({
     name,
     width: canvas.width,
@@ -144,7 +149,7 @@ export async function exportFiles(
   const combined = await toFile(full, emojiFileName(format))
   const split = await Promise.all(
     splitSections.map((section, index) =>
-      toFile(cropSection(full, section), emojiFileName(format, index))
+      toFile(cropSection(full, box, section), emojiFileName(format, index))
     )
   )
   return { combined, split }

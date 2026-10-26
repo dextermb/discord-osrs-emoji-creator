@@ -18,8 +18,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAssetDataUri } from "@/hooks/use-asset-data-uri"
 import {
+  areaWidth,
   CANVAS_HEIGHT,
-  canvasWidth,
+  canvasBox,
   hasText,
   iconLocalBox,
   type EditorAction,
@@ -45,6 +46,7 @@ const HANDLE_SIZE = 8
 const ROTATE_HANDLE_OFFSET = 20
 const NUDGE = 1
 const NUDGE_LARGE = 10
+const GUIDE_DASH = "4 4"
 
 const ARROW_DIRECTIONS: Record<string, Point> = {
   ArrowLeft: { x: -1, y: 0 },
@@ -135,10 +137,10 @@ export function EmojiCanvas({
 
   const hasIcon = asset !== null && dataUri !== null
   const exists = { icon: hasIcon, text: hasText(state), rect: rect !== null }
-  const selection = state.selection === "background" ? null : state.selection
+  const selection = state.selection === "canvas" ? null : state.selection
   const selected =
     selection && exists[selection] && !locked[selection] ? selection : null
-  const width = canvasWidth(state)
+  const box = canvasBox(state)
 
   function select(selection: ElementId | null) {
     dispatch({ type: "select", selection })
@@ -247,9 +249,9 @@ export function EmojiCanvas({
       <div className="overflow-x-auto p-6">
         <svg
           ref={svgRef}
-          width={width}
+          width={box.width}
           height={CANVAS_HEIGHT}
-          viewBox={`0 0 ${width} ${CANVAS_HEIGHT}`}
+          viewBox={`${box.x} 0 ${box.width} ${CANVAS_HEIGHT}`}
           aria-label="Emoji canvas"
           className="block touch-none overflow-visible font-sans outline outline-dashed outline-border select-none"
           onPointerDown={() => select(null)}
@@ -258,6 +260,7 @@ export function EmojiCanvas({
           onPointerCancel={handlePointerEnd}
         >
           <EmojiArtwork state={state} dataUri={dataUri} wrapLayer={wrapLayer} />
+          <PaddingGuides state={state} />
           {selected && (
             <SelectionHandles
               {...selectionFrame(selected)}
@@ -269,6 +272,22 @@ export function EmojiCanvas({
         </svg>
       </div>
     </div>
+  )
+}
+
+function PaddingGuides({ state }: { state: EditorState }) {
+  const { left, right } = state.padding
+  const guides = [
+    ...(left > 0 ? [-0.5] : []),
+    ...(right > 0 ? [areaWidth(state) + 0.5] : []),
+  ]
+
+  return (
+    <g aria-hidden pointerEvents="none" className="stroke-border">
+      {guides.map((x) => (
+        <line key={x} x1={x} y1={0} x2={x} y2={CANVAS_HEIGHT} strokeDasharray={GUIDE_DASH} />
+      ))}
+    </g>
   )
 }
 

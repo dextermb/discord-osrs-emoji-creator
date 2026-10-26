@@ -30,10 +30,13 @@ combined files, see [export.md](./export.md).
 `sections(state)` in `lib/editor.ts` gives the sections:
 
 ```
-split off:  [{ x: 0, width: canvasWidth }]
-split on:   [{ x: 0, width: 128 }, { x: 128, width: 128 }, …]
-            count = ceil(canvasWidth / 128)
+split off:  [canvasBox]
+split on:   [{ x: box.x, width: 128 }, { x: box.x + 128, width: 128 }, …]
+            count = ceil(canvasBox.width / 128)
 ```
+
+The first section starts at the left edge of the left padding. For
+`canvasBox`, see [state.md](./state.md).
 
 Each section has the full 128 px width. The last section gets a transparent
 strip at its right. Discord centres a narrow image in its square, so a narrow
@@ -50,7 +53,7 @@ the user types together touch, as with a gap of 0. A space character between
 the emoji gives a gap of one space width. Use the input to see that case.
 
 - The gap is only in the preview. The sections do not change: section 2 still
-  starts at canvas x = 128, so no canvas pixels are skipped.
+  starts 128 px after section 1, so no canvas pixels are skipped.
 - Both rows use the same gap.
 - With the split off, there is one emoji, so the input is disabled.
 - The gap is local to the tab and is not part of the emoji.

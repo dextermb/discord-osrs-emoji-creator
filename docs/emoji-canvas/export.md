@@ -33,7 +33,7 @@ not change them:
 
 | Group    | Files                                    | Pixel size          |
 | -------- | ---------------------------------------- | ------------------- |
-| Combined | `emoji.png`                              | `canvasWidth` × 128 |
+| Combined | `emoji.png`                              | `canvasBox.width` × 128 |
 | Split    | `emoji_1.png`, `emoji_2.png`, …          | 128 × 128 each      |
 | Split    | `emoji.zip`: all split files, no compression | —               |
 
@@ -59,12 +59,15 @@ EmojiExport (format comes from EmojiEditor, so it stays across tab changes)
        document.fonts.load(font, text) ─▶ document.fonts.check ─▶ fontReady
        svg.cloneNode ─▶ remove <text> ─▶ XMLSerializer
          ─▶ Blob(image/svg+xml) ─▶ Image.decode()
-         ─▶ <canvas> canvasWidth × 128: drawImage, then fillText   combined
+         ─▶ <canvas> canvasBox.width × 128: drawImage, then fillText   combined
          ─▶ crop each section to 128 × 128 ─▶ toBlob(type)         split
          ─▶ fflate zipSync(split, level 0) ─▶ Blob                ZIP
        ─▶ object URLs ─▶ <Image unoptimized> + <a download>
 ```
 
+- The canvas pixel x = 0 is the SVG x = `canvasBox.x`. Thus `fillText` moves
+  by `-canvasBox.x` first, and each crop starts at `section.x - canvasBox.x`.
+  With no left padding, both offsets are 0.
 - The tab is not kept mounted, so a drag on the canvas does not make files.
 - When a new result arrives, the effect revokes the object URLs of the old
   result.

@@ -18,6 +18,7 @@ export const ICON_SLOT = 128
 export const BACKGROUND_MAX_HEIGHT = 512
 export const SPLIT_WIDTH = 128
 export const DEFAULT_TEXT_COLOUR = "#ffffff"
+export const MAX_PADDING = 256
 
 const TEXT_GAP = 8
 const TEXT_PADDING = 8
@@ -25,7 +26,7 @@ const RECT_INSET = 8
 
 export type ElementId = "icon" | "text" | "rect"
 
-export type Selection = ElementId | "background"
+export type Selection = ElementId | "canvas"
 
 export type RectStyle = {
   fill: string
@@ -43,6 +44,8 @@ export type Size = { width: number; height: number }
 
 export type Insets = { top: number; right: number; bottom: number; left: number }
 
+export type Padding = { left: number; right: number }
+
 export type EditorState = {
   asset: IconAsset | null
   icon: Placement
@@ -50,6 +53,7 @@ export type EditorState = {
   text: { value: string; box: Box; placement: Placement; colour: string; font: TextFont }
   background: Background | null
   canvasColour: string | null
+  padding: Padding
   split: boolean
   rect: { placement: RectPlacement; style: RectStyle } | null
   selection: Selection | null
@@ -63,6 +67,7 @@ export type EditorAction =
   | { type: "setTextFont"; font: TextFont }
   | { type: "setFontWeight"; weight: number }
   | { type: "setCanvasColour"; colour: string | null }
+  | { type: "setPadding"; padding: Partial<Padding> }
   | { type: "setSplit"; split: boolean }
   | { type: "textMeasured"; box: Box }
   | { type: "setBackground"; background: Background | null }
@@ -137,6 +142,7 @@ export function initialEditorState(asset: IconAsset | null): EditorState {
     },
     background: null,
     canvasColour: null,
+    padding: { left: 0, right: 0 },
     split: false,
     rect: null,
     selection: null,
@@ -148,7 +154,7 @@ export function hasText(state: EditorState) {
   return state.text.value.length > 0 && state.text.box.width > 0
 }
 
-function canvasWidthFrom(rightEdges: number[]) {
+function areaWidthFrom(rightEdges: number[]) {
   return Math.max(CANVAS_HEIGHT, Math.ceil(Math.max(...rightEdges)))
 }
 
@@ -159,23 +165,32 @@ export function contentWidth(state: EditorState) {
   const textRight = hasText(state)
     ? rotatedBounds(state.text.placement, state.text.box).maxX + TEXT_PADDING
     : 0
-  return canvasWidthFrom([iconRight, textRight])
+  return areaWidthFrom([iconRight, textRight])
 }
 
-export function canvasWidth(state: EditorState) {
+export function areaWidth(state: EditorState) {
   const rectRight = state.rect ? rectBounds(state.rect.placement).maxX : 0
-  return canvasWidthFrom([contentWidth(state), rectRight])
+  return areaWidthFrom([contentWidth(state), rectRight])
 }
 
 export type Section = { x: number; width: number }
 
+export function canvasBox(state: EditorState): Section {
+  const { left, right } = state.padding
+  return { x: -left, width: areaWidth(state) + left + right }
+}
+
 export function sections(state: EditorState): Section[] {
-  const width = canvasWidth(state)
-  if (!state.split) return [{ x: 0, width }]
-  return Array.from({ length: Math.ceil(width / SPLIT_WIDTH) }, (_, index) => ({
-    x: index * SPLIT_WIDTH,
+  const box = canvasBox(state)
+  if (!state.split) return [box]
+  return Array.from({ length: Math.ceil(box.width / SPLIT_WIDTH) }, (_, index) => ({
+    x: box.x + index * SPLIT_WIDTH,
     width: SPLIT_WIDTH,
   }))
+}
+
+function clampPadding(value: number) {
+  return Math.min(MAX_PADDING, Math.max(0, Math.round(value)))
 }
 
 export function rectInsets(state: EditorState): Insets | null {
@@ -256,6 +271,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     }
     case "setCanvasColour":
       return { ...state, canvasColour: action.colour }
+    case "setPadding": {
+      const { left = state.padding.left, right = state.padding.right } = action.padding
+      return {
+        ...state,
+        padding: { left: clampPadding(left), right: clampPadding(right) },
+      }
+    }
     case "setSplit":
       return { ...state, split: action.split }
     case "textMeasured": {
@@ -320,7 +342,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "select":
       if (
         action.selection &&
-        action.selection !== "background" &&
+        action.selection !== "canvas" &&
         state.locked[action.selection]
       )
         return state
