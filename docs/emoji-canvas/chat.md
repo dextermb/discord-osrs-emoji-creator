@@ -100,9 +100,11 @@ The conversation is fixed. Only the emoji comes from the editor.
 1. "ironbtw" writes "new clan emoji is up, details in the pins" with the emoji
    inline.
 2. "ironbtw" sends the emoji alone (jumbo).
-3. The viewer reacted with the first section. A reaction is one emoji, and the
-   other sections would show broken words. A click on the pill toggles the
-   viewer's reaction.
+3. The jumbo message has one reaction pill for each section, in order, so the
+   pills spell the emoji with a 4 px gap between them. A reaction is one emoji,
+   so a split emoji needs one pill for each section. The viewer reacted with
+   all sections. A click on a pill toggles the viewer's reaction for that
+   section only.
 4. "skillersam" replies "what are the clan benefits?". The reply line quotes
    the emoji.
 5. The message box holds the draft "see" and the emoji.
@@ -114,7 +116,7 @@ no `:name:` autocomplete, because the emoji has no name.
 
 ```
 EmojiEditor ── state ─────────────────────────────▶ EmojiChat
-EmojiChat (local: theme, display, spacing, reacted)
+EmojiChat (local: theme, display, spacing, unreacted sections)
   ├─ split toggle ────────────────────────────────▶ setSplit
   ├─ useAssetDataUri(state.asset) ─▶ dataUri         the same cache
   ├─ sections(state) ─▶ Section[]
@@ -127,7 +129,9 @@ EmojiChat (local: theme, display, spacing, reacted)
 - The theme (default Dark), the display (default Default) and the spacing
   (default 16 px) are local to the tab and are not part of the emoji. The tab
   stays mounted (`keepMounted`), so they stay when the user changes tab.
-- With the split, the chat draws about 17 `EmojiArtwork` copies. Each copy
+- The chat draws one `EmojiArtwork` copy for each section at each of 5 places
+  (inline, jumbo, reactions, reply line, message box): 20 copies for the
+  4-section example. Each copy
   holds the icon and the background as data URIs. If this becomes slow,
   render the artwork one time in a hidden `<svg>` and point at it with
   `<use href>`.

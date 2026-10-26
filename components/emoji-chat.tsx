@@ -46,7 +46,7 @@ export function EmojiChat({
   const [theme, setTheme] = useState<DiscordTheme>(DEFAULT_THEME)
   const [display, setDisplay] = useState<MessageDisplay>("default")
   const [spacing, setSpacing] = useState(DEFAULT_GROUP_SPACING)
-  const [reacted, setReacted] = useState(true)
+  const [unreacted, setUnreacted] = useState<number[]>([])
   const emojiSections = sections(state)
   const sizes = chatSizes(display, emojiSections.length)
 
@@ -62,14 +62,25 @@ export function EmojiChat({
 
   const reactions = (
     <div className="flex flex-wrap pt-0.5 pb-1.5 indent-0">
-      <DiscordReaction
-        own={reacted}
-        count={OTHER_REACTIONS + (reacted ? 1 : 0)}
-        label={`Emoji reaction, ${OTHER_REACTIONS + (reacted ? 1 : 0)} reactions${reacted ? ", you reacted" : ""}`}
-        onPressedChange={setReacted}
-      >
-        {emoji(sizes.reaction, emojiSections.slice(0, 1))}
-      </DiscordReaction>
+      {emojiSections.map((section, index) => {
+        const own = !unreacted.includes(section.x)
+        const count = OTHER_REACTIONS + (own ? 1 : 0)
+        return (
+          <DiscordReaction
+            key={section.x}
+            own={own}
+            count={count}
+            label={`Emoji ${index + 1} of ${emojiSections.length}, ${count} reactions${own ? ", you reacted" : ""}`}
+            onPressedChange={(next) =>
+              setUnreacted((xs) =>
+                next ? xs.filter((x) => x !== section.x) : [...xs, section.x]
+              )
+            }
+          >
+            {emoji(sizes.reaction, [section])}
+          </DiscordReaction>
+        )
+      })}
     </div>
   )
 
