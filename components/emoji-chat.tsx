@@ -103,19 +103,19 @@ export function EmojiChat({
     <div className="flex flex-col gap-6 p-6">
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <SplitToggle split={state.split} dispatch={dispatch} />
-        <ChatOption
+        <OptionGroup
           label="Theme"
           value={theme}
           options={DISCORD_THEMES.map(({ theme: value, label }) => ({ value, label }))}
           onValueChange={setTheme}
         />
-        <ChatOption
+        <OptionGroup
           label="Display"
           value={display}
           options={MESSAGE_DISPLAYS.map(({ display: value, label }) => ({ value, label }))}
           onValueChange={setDisplay}
         />
-        <ChatOption
+        <OptionGroup
           label="Spacing"
           value={String(spacing)}
           options={GROUP_SPACINGS.map((gap) => ({ value: String(gap), label: `${gap} px` }))}
@@ -221,7 +221,7 @@ function EmojiRun({
   )
 }
 
-function ChatOption<Value extends string>({
+export function OptionGroup<Value extends string>({
   label,
   value,
   options,
@@ -229,7 +229,7 @@ function ChatOption<Value extends string>({
 }: {
   label: string
   value: Value
-  options: { value: Value; label: string }[]
+  options: { value: Value; label: string; disabled?: boolean }[]
   onValueChange: (value: Value) => void
 }) {
   const labelId = useId()
@@ -246,7 +246,12 @@ function ChatOption<Value extends string>({
         onValueChange={([next]) => next && onValueChange(next as Value)}
       >
         {options.map((option) => (
-          <ToggleGroupItem key={option.value} value={option.value} className={toolClass}>
+          <ToggleGroupItem
+            key={option.value}
+            value={option.value}
+            disabled={option.disabled}
+            className={toolClass}
+          >
             {option.label}
           </ToggleGroupItem>
         ))}

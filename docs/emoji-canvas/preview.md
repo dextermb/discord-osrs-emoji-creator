@@ -17,8 +17,9 @@ the sizes and their sources.
 
 ## Split
 
-The "Split 128 px" toggle sets `split` in the editor state. A later download
-step can then read the sections from the state.
+The "Split 128 px" toggle sets `split` in the editor state. The "Chat" tab
+reads the same value. The "Export" tab always offers both the split and the
+combined files, see [export.md](./export.md).
 
 - **Off:** one section, the full canvas width. The preview shows it in one
   square, as Discord does.
