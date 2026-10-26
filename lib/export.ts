@@ -1,6 +1,7 @@
 import { zipSync } from "fflate"
 
 import { CANVAS_HEIGHT, type Section } from "@/lib/editor"
+import type { Placement } from "@/lib/placement"
 
 export type ExportFormat = "png" | "webp"
 
@@ -12,6 +13,29 @@ export const EXPORT_FORMATS: { format: ExportFormat; label: string; type: string
 export const MAX_EMOJI_BYTES = 256 * 1024
 
 const BASE_NAME = "emoji"
+
+const GENERIC_FAMILIES = new Set([
+  "serif",
+  "sans-serif",
+  "monospace",
+  "cursive",
+  "fantasy",
+  "system-ui",
+  "ui-serif",
+  "ui-sans-serif",
+  "ui-monospace",
+  "ui-rounded",
+  "math",
+  "emoji",
+  "fangsong",
+])
+
+export type ExportText = {
+  value: string
+  font: string
+  colour: string
+  placement: Placement
+}
 
 export type ExportFile = {
   name: string
@@ -27,6 +51,30 @@ export function formatType(format: ExportFormat) {
 export function emojiFileName(format: ExportFormat, index?: number) {
   const suffix = index === undefined ? "" : `_${index + 1}`
   return `${BASE_NAME}${suffix}.${format}`
+}
+
+export function canvasFont(weight: number, size: number, fontFamily: string) {
+  const families = fontFamily
+    .split(",")
+    .map((family) => family.trim().replace(/^["']|["']$/g, ""))
+    .filter(Boolean)
+    .map((family) => (GENERIC_FAMILIES.has(family) ? family : `"${family.replaceAll('"', '\\"')}"`))
+  return `${weight} ${size}px ${families.join(", ")}`
+}
+
+function drawText(context: CanvasRenderingContext2D, text: ExportText) {
+  const { cx, cy, rotation, scale } = text.placement
+  context.save()
+  context.font = text.font
+  context.textAlign = "center"
+  context.textBaseline = "alphabetic"
+  context.fillStyle = text.colour
+  context.translate(cx, cy)
+  context.rotate((rotation * Math.PI) / 180)
+  context.scale(scale, scale)
+  const { fontBoundingBoxAscent, fontBoundingBoxDescent } = context.measureText(text.value)
+  context.fillText(text.value, 0, (fontBoundingBoxAscent - fontBoundingBoxDescent) / 2)
+  context.restore()
 }
 
 function canvasToBlob(canvas: HTMLCanvasElement, type: string) {
@@ -46,7 +94,7 @@ export async function canEncode(type: string) {
   return blob.type === type
 }
 
-async function svgToCanvas(svg: string, width: number) {
+async function svgToCanvas(svg: string, width: number, text: ExportText | null) {
   const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }))
   try {
     const image = new Image()
@@ -59,6 +107,7 @@ async function svgToCanvas(svg: string, width: number) {
     const context = canvas.getContext("2d")
     if (!context) throw new Error("Canvas 2D is not available")
     context.drawImage(image, 0, 0, width, CANVAS_HEIGHT)
+    if (text) drawText(context, text)
     return canvas
   } finally {
     URL.revokeObjectURL(url)
@@ -78,12 +127,13 @@ function cropSection(source: HTMLCanvasElement, { x, width }: Section) {
 
 export async function exportFiles(
   svg: string,
+  text: ExportText | null,
   width: number,
   splitSections: Section[],
   format: ExportFormat
 ) {
   const type = formatType(format)
-  const full = await svgToCanvas(svg, width)
+  const full = await svgToCanvas(svg, width, text)
   const toFile = async (canvas: HTMLCanvasElement, name: string): Promise<ExportFile> => ({
     name,
     width: canvas.width,

@@ -27,8 +27,9 @@ DEFAULT_TEXT_FONT = { google, "Jim Nightshade", weights [400], weight 400 }
 - `setTextFont` replaces the font. `setFontWeight` changes the weight of a
   Google font, only to a weight in `weights`.
 - A Google font keeps its `weights`, so the "Weight" control needs no list.
-- An upload keeps its file as a data URI (as the background image does), so
-  the "Export" tab can embed the font (see [export.md](./export.md)).
+- An upload keeps its file as a data URI (as the background image does).
+  The "Export" tab draws the text with the `FontFace` in `document.fonts`
+  (see [export.md](./export.md)).
 
 `textFontStyle(font)` gives `{ fontFamily, fontWeight }`. `EmojiArtwork` and
 `TextMeasure` put it in the `style` of the `<text>`. A `font-family`
@@ -79,10 +80,11 @@ Upload ─▶ size ≤ 5 MB ─▶ new FontFace("upload-<n>", bytes, { weight: 4
   changes when the font arrives.
 - `useTextFont` runs in `EmojiEditor`, so the font loads also when the "Text"
   panel is closed.
-- While a font loads, the text shows in the fallback font. When it loads,
-  `document.fonts` sends `loadingdone`, and `TextMeasure` measures again. The
-  left edge of the text stays in the same position (see
-  [elements.md](./elements.md)).
+- While a font loads, the text shows in the fallback font. `TextMeasure`
+  measures again when `useTextFont` stops loading, and when `document.fonts`
+  sends `loadingdone`. In WebKit, `loadingdone` alone did not measure again
+  after a Google font loaded. The left edge of the text stays in the
+  same position (see [elements.md](./elements.md)).
 - An upload gets a new family name each time. Thus it cannot collide with a
   Google font or a page font.
 

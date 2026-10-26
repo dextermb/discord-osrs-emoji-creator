@@ -38,7 +38,12 @@ export function EmojiEditor() {
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      <TextMeasure value={state.text.value} font={state.text.font} dispatch={dispatch} />
+      <TextMeasure
+        value={state.text.value}
+        font={state.text.font}
+        fontLoading={fontStatus.isLoading}
+        dispatch={dispatch}
+      />
       <Tabs defaultValue="canvas" className="border-b">
         <TabsList aria-label="View" className={cn(panelHeadingClass, "justify-start gap-0 p-0")}>
           <TabsTrigger value="canvas">Canvas</TabsTrigger>

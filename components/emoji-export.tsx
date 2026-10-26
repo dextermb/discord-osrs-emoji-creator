@@ -5,7 +5,7 @@ import Image from "next/image"
 import { DownloadIcon, FileArchiveIcon, TriangleAlertIcon } from "lucide-react"
 import { cn } from "cn"
 
-import { EmojiArtwork } from "@/components/emoji-artwork"
+import { EmojiArtwork, TEXT_ATTRIBUTES } from "@/components/emoji-artwork"
 import { OptionGroup } from "@/components/emoji-chat"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { buttonVariants } from "@/components/ui/button"
@@ -13,9 +13,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useAssetDataUri } from "@/hooks/use-asset-data-uri"
 import type { FontStatus } from "@/hooks/use-text-font"
 import { CANVAS_HEIGHT, canvasWidth, hasText, sections, type EditorState } from "@/lib/editor"
-import { embeddedFontCss } from "@/lib/embedded-font"
 import {
   canEncode,
+  canvasFont,
   emojiFileName,
   EXPORT_FORMATS,
   exportFiles,
@@ -23,6 +23,7 @@ import {
   zipFiles,
   type ExportFile,
   type ExportFormat,
+  type ExportText,
 } from "@/lib/export"
 
 type ReadyFile = ExportFile & { url: string }
@@ -33,15 +34,28 @@ type ExportResult =
 
 const labelClass = "text-sm tracking-label text-muted-foreground uppercase"
 
-function serializeSvg(svg: SVGSVGElement, fontFamily: string, fontCss: string | null) {
+function serializeSvg(svg: SVGSVGElement) {
   const clone = svg.cloneNode(true) as SVGSVGElement
-  clone.querySelector("text")?.style.setProperty("font-family", fontFamily)
-  if (fontCss) {
-    const style = document.createElementNS("http://www.w3.org/2000/svg", "style")
-    style.textContent = fontCss
-    clone.prepend(style)
-  }
+  clone.querySelector("text")?.remove()
   return new XMLSerializer().serializeToString(clone)
+}
+
+async function exportText(svg: SVGSVGElement, state: EditorState) {
+  const element = svg.querySelector("text")
+  if (!element || !hasText(state)) return { text: null, fontReady: true }
+
+  const { value, colour, placement, font } = state.text
+  const shorthand = canvasFont(
+    font.weight,
+    TEXT_ATTRIBUTES.fontSize,
+    getComputedStyle(element).fontFamily
+  )
+  const fontReady = await document.fonts
+    .load(shorthand, value)
+    .then(() => document.fonts.check(shorthand, value))
+    .catch(() => false)
+  const text: ExportText = { value, colour, placement, font: shorthand }
+  return { text, fontReady }
 }
 
 function withUrl(file: ExportFile): ReadyFile {
@@ -91,16 +105,10 @@ export function EmojiExport({
 
     let cancelled = false
     const render = async () => {
-      const text = svg.querySelector("text")
-      const fontFamily = text ? getComputedStyle(text).fontFamily : ""
-      const fontCss = await embeddedFontCss(
-        state.text.font,
-        fontFamily,
-        hasText(state) ? state.text.value : ""
-      ).catch(() => null)
-      const markup = serializeSvg(svg, fontFamily, fontCss)
+      const { text, fontReady } = await exportText(svg, state)
       const files = await exportFiles(
-        markup,
+        serializeSvg(svg),
+        text,
         canvasWidth(state),
         sections({ ...state, split: true }),
         format
@@ -112,7 +120,7 @@ export function EmojiExport({
         combined: withUrl(files.combined),
         split: files.split.map(withUrl),
         zipUrl: URL.createObjectURL(zip),
-        fontFailed: fontCss === null && hasText(state),
+        fontFailed: !fontReady,
       })
     }
     render().catch(() => {
@@ -174,7 +182,7 @@ export function EmojiExport({
       {ready?.fontFailed && (
         <Alert variant="destructive">
           <AlertDescription>
-            Could not embed the text font. The text in the files can look different.
+            Could not load the text font. The text in the files can look different.
           </AlertDescription>
         </Alert>
       )}

@@ -9,8 +9,7 @@ see [preview.md](./preview.md).
 | File                            | Purpose                                                   |
 | ------------------------------- | --------------------------------------------------------- |
 | `components/emoji-export.tsx`   | The tab: the format choice, the hidden SVG, the file rows. |
-| `lib/export.ts`                 | The formats, the size limit, the file names, `exportFiles`, `zipFiles`. |
-| `lib/embedded-font.ts`          | `embeddedFontCss`: the text font as `@font-face` CSS with data URIs. |
+| `lib/export.ts`                 | The formats, the size limit, the file names, `canvasFont`, `exportFiles`, `zipFiles`. |
 
 ## Discord rules
 
@@ -56,12 +55,13 @@ with "(too large for Discord)". The link stays active.
 EmojiExport (format comes from EmojiEditor, so it stays across tab changes)
   ├─ hidden <svg xmlns width height> ─▶ EmojiArtwork    the same layers
   └─ effect, on state, icon, text font or format change:
-       getComputedStyle(text).fontFamily ─▶ embeddedFontCss ─▶ CSS
-       svg.cloneNode ─▶ + text font-family, + <style> font CSS
-         ─▶ XMLSerializer ─▶ Blob(image/svg+xml) ─▶ Image.decode()
-         ─▶ <canvas> canvasWidth × 128 ─▶ toBlob(type)          combined
-         ─▶ crop each section to 128 × 128 ─▶ toBlob(type)      split
-         ─▶ fflate zipSync(split, level 0) ─▶ Blob             ZIP
+       getComputedStyle(text).fontFamily ─▶ canvasFont ─▶ "400 48px \"Lobster\", …"
+       document.fonts.load(font, text) ─▶ document.fonts.check ─▶ fontReady
+       svg.cloneNode ─▶ remove <text> ─▶ XMLSerializer
+         ─▶ Blob(image/svg+xml) ─▶ Image.decode()
+         ─▶ <canvas> canvasWidth × 128: drawImage, then fillText   combined
+         ─▶ crop each section to 128 × 128 ─▶ toBlob(type)         split
+         ─▶ fflate zipSync(split, level 0) ─▶ Blob                ZIP
        ─▶ object URLs ─▶ <Image unoptimized> + <a download>
 ```
 
@@ -73,34 +73,36 @@ EmojiExport (format comes from EmojiEditor, so it stays across tab changes)
 
 ## The font
 
-An SVG that loads as an `Image` cannot see the fonts of the page, and cannot
-resolve CSS custom properties such as `var(--font-emoji)`. Without help, the
-text renders in a fallback font, and the text width does not agree with
-`text.box` from `TextMeasure`. For the text font, see [fonts.md](./fonts.md).
+The SVG image holds every layer except the text. The canvas draws the text
+with `fillText`, on top of the image. The text is the top layer, so the layer
+order does not change. For the text font, see [fonts.md](./fonts.md).
 
-1. The tab reads `getComputedStyle(text).fontFamily` from the hidden `<text>`.
-   This gives the resolved family list, for example
-   `"Press Start 2P", Geist, "Geist Fallback"`.
-2. `embeddedFontCss(font, fontFamily, text)` collects the `@font-face` rules:
+Why not the text in the SVG: an SVG that loads as an `Image` cannot see the
+page fonts. A font in a `<style>` in the SVG works, but `Image.decode()` does
+not wait for it. WebKit then draws the text in a fallback font, in 4 of 5
+tests. The canvas uses the page fonts, and `document.fonts.load()` tells when
+the font is ready.
 
-   | Font source        | Where the rules come from                              |
-   | ------------------ | ------------------------------------------------------ |
-   | `next/font`        | `document.styleSheets` (same origin).                  |
-   | Google, at runtime | A new fetch of the `css2` URL, parsed with `new CSSStyleSheet()`. The page `<link>` is cross-origin, so its rules cannot be read. |
-   | Upload             | A new rule with `font.dataUri` as the `src`.           |
+1. `getComputedStyle(text).fontFamily` on the hidden `<text>` gives the
+   resolved families. A `var(--font-emoji)` becomes "Jim Nightshade".
+2. `canvasFont(weight, 48, families)` quotes each family, because a canvas
+   font with `Press Start 2P` unquoted is not valid. Generic families such as
+   `serif` stay unquoted.
+3. `document.fonts.load(font, text)`, then `document.fonts.check(font, text)`.
+   An upload is a `FontFace` in `document.fonts`, so it works the same.
+4. `drawText` applies the text placement (`translate`, `rotate`, `scale`) and
+   draws with `textAlign = "center"`.
 
-3. It keeps the rules whose family is in the list and whose `unicode-range`
-   covers a character of the text. A Google font has one rule for each
-   subset, so this skips most files.
-4. It fetches each `url(…)` and replaces it with a data URI. Each URL and
-   each Google CSS file is cached.
-5. The clone gets the resolved family on its `<text>`, and the CSS in a
-   `<style>`. The CSS goes in the clone, not in the page, so the page fonts
-   do not change.
+The SVG text uses `dominant-baseline="central"`. The canvas has no "central"
+baseline, and its "middle" is 2–3 px higher. So the canvas uses
+`textBaseline = "alphabetic"` at
+`y = (fontBoundingBoxAscent − fontBoundingBoxDescent) / 2`. In Chromium this
+gives the same pixels as the SVG. In WebKit the text is 1 px higher than in
+the canvas view.
 
-The tab waits while the Google font loads (`useTextFont`). If the first family
-has no rule, or a fetch fails, the tab still makes the files and shows "Could
-not embed the text font".
+The tab waits while the Google font loads (`useTextFont`). If the font check
+fails, the tab still makes the files and shows "Could not load the text
+font".
 
 ## Format support
 
