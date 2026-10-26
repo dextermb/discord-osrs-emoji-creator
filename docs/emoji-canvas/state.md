@@ -32,7 +32,10 @@ EmojiEditor ── useReducer(editorReducer) ──▶ state
   │    └─ pointer, keyboard ─────────────────▶ set*Placement, moveBy, select
   ├─ tab "Preview": EmojiPreview
   │    ├─ split toggle ──────────────────────▶ setSplit
-  │    └─ sections(state) ─▶ one <svg> each ─▶ EmojiArtwork
+  │    └─ sections(state) ─▶ EmojiSection each ─▶ EmojiArtwork
+  ├─ tab "Chat":    EmojiChat                  see chat.md
+  │    ├─ split toggle ──────────────────────▶ setSplit
+  │    └─ sections(state) ─▶ EmojiSection each ─▶ EmojiArtwork
   ├─ LayerList ──────────────────────────────▶ select, setLocked
   ├─ "Add rectangle" (no rectangle) ─────────▶ addRect
   ├─ LayerPanel                                one panel for the selection

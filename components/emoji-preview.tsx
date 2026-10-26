@@ -4,7 +4,7 @@ import { useId, useState, type Dispatch } from "react"
 import { MoonIcon, ScissorsIcon, SunIcon } from "lucide-react"
 import { cn } from "cn"
 
-import { EmojiArtwork } from "@/components/emoji-artwork"
+import { EmojiSection } from "@/components/emoji-section"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -12,7 +12,6 @@ import { Toggle } from "@/components/ui/toggle"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useAssetDataUri } from "@/hooks/use-asset-data-uri"
 import {
-  CANVAS_HEIGHT,
   sections,
   SPLIT_WIDTH,
   type EditorAction,
@@ -33,8 +32,27 @@ const GROUND_CLASS: Record<Ground, string> = {
   light: "bg-white",
 }
 
-const toolClass =
+export const toolClass =
   "border border-border-strong uppercase tracking-label hover:border-foreground hover:bg-foreground hover:text-background aria-pressed:border-foreground"
+
+export function SplitToggle({
+  split,
+  dispatch,
+}: {
+  split: boolean
+  dispatch: Dispatch<EditorAction>
+}) {
+  return (
+    <Toggle
+      pressed={split}
+      onPressedChange={(next) => dispatch({ type: "setSplit", split: next })}
+      className={toolClass}
+    >
+      <ScissorsIcon data-icon="inline-start" />
+      Split {SPLIT_WIDTH} px
+    </Toggle>
+  )
+}
 
 export function EmojiPreview({
   state,
@@ -52,14 +70,7 @@ export function EmojiPreview({
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Toggle
-          pressed={state.split}
-          onPressedChange={(split) => dispatch({ type: "setSplit", split })}
-          className={toolClass}
-        >
-          <ScissorsIcon data-icon="inline-start" />
-          Split {SPLIT_WIDTH} px
-        </Toggle>
+        <SplitToggle split={state.split} dispatch={dispatch} />
         <Field orientation="horizontal" className="w-auto">
           <FieldLabel htmlFor={gapId}>Gap (px)</FieldLabel>
           <Input
@@ -109,18 +120,13 @@ export function EmojiPreview({
                 <Skeleton style={{ width: size, height: size }} />
               ) : (
                 emojiSections.map((section) => (
-                  <svg
+                  <EmojiSection
                     key={section.x}
-                    role="img"
-                    aria-label={`Emoji at ${size} px, from x = ${section.x}`}
-                    width={size}
-                    height={size}
-                    viewBox={`${section.x} 0 ${section.width} ${CANVAS_HEIGHT}`}
-                    preserveAspectRatio="xMidYMid meet"
-                    className="block shrink-0 font-sans"
-                  >
-                    <EmojiArtwork state={state} dataUri={dataUri} />
-                  </svg>
+                    state={state}
+                    dataUri={dataUri}
+                    section={section}
+                    size={size}
+                  />
                 ))
               )}
             </dd>

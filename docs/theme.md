@@ -45,6 +45,8 @@ values.
 
 - The interface is Geist Mono (`font-mono` on `<html>`). The canvas `<svg>`
   sets `font-sans`, so the emoji text stays in Geist.
+- The Discord copy in the "Chat" tab uses Noto Sans (`--font-discord`) and its
+  own colours. See [emoji-canvas/chat.md](./emoji-canvas/chat.md).
 - `text-sm` and `text-base` are 12.75 px, `text-xs` is 11.05 px.
 - `font-medium` is 400. Blackline uses one weight. The canvas text stays bold,
   because it sets `font-weight` on the `<text>` element.

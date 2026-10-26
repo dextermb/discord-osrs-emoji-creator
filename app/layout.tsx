@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 const geistMono = Geist_Mono({subsets:['latin'],variable:'--font-mono'});
+const notoSans = Noto_Sans({subsets:['latin'],variable:'--font-discord',preload:false});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={cn("dark font-mono", geist.variable, geistMono.variable)}>
+    <html lang="en" className={cn("dark font-mono", geist.variable, geistMono.variable, notoSans.variable)}>
       <body>{children}</body>
     </html>
   );

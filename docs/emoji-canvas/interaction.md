@@ -5,10 +5,11 @@ error states. Back to [emoji-canvas.md](../emoji-canvas.md).
 
 ## Tabs
 
-The heading strip above the canvas holds two tabs: "Canvas" and "Preview". The
-active tab is inverted. "Canvas" is the editor. "Preview" shows the emoji at
-the Discord sizes, see [preview.md](./preview.md). The layer list and the
-panel stay below both tabs, so the user can change the emoji in the preview.
+The heading strip above the canvas holds three tabs: "Canvas", "Preview" and
+"Chat". The active tab is inverted. "Canvas" is the editor. "Preview" shows the
+emoji at the Discord sizes, see [preview.md](./preview.md). "Chat" shows the
+emoji in Discord messages, see [chat.md](./chat.md). The layer list and the
+panel stay below all tabs, so the user can change the emoji in each view.
 
 ## Layer list and panel
 
