@@ -29,7 +29,7 @@ values.
 | `--foreground`       | `#ffffff` | `#000000` | Text, and the fill of an inverted element. |
 | `--card`             | `#080808` | `#eeeeee` | Heading strips.                            |
 | `--popover`          | `#262626` | `#eeeeee` | Combobox lists.                            |
-| `--muted`            | `#262626` | `#e4e4e4` | The canvas ground.                         |
+| `--muted`            | `#262626` | `#e4e4e4` | Slider tracks, skeletons, hover fills.     |
 | `--muted-foreground` | `#8a8a8a` | `#585858` | Labels and secondary text.                 |
 | `--accent`           | `#ffffff` | `#000000` | The highlighted combobox option.           |
 | `--destructive`      | `#ff6666` | `#b91c1c` | Remove buttons and errors.                 |

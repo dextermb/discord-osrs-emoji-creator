@@ -13,8 +13,8 @@ rectangle: their sources, placement and style. Back to
   rectangle (the background image does).
 - "Remove" sets the colour back to none. With no colour, the input shows
   `#000000`.
-- The grey ground of the editor (`bg-muted`) is not part of the emoji. It shows
-  where the emoji is transparent.
+- The canvas has no ground of its own. Where the emoji is transparent, the
+  black page shows through.
 
 ## Background image
 

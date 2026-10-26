@@ -251,7 +251,7 @@ export function EmojiCanvas({
           height={CANVAS_HEIGHT}
           viewBox={`0 0 ${width} ${CANVAS_HEIGHT}`}
           aria-label="Emoji canvas"
-          className="block touch-none overflow-visible bg-muted font-sans select-none"
+          className="block touch-none overflow-visible font-sans select-none"
           onPointerDown={() => select(null)}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerEnd}

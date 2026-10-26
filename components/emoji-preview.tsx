@@ -1,10 +1,12 @@
 "use client"
 
-import { useState, type Dispatch } from "react"
+import { useId, useState, type Dispatch } from "react"
 import { MoonIcon, ScissorsIcon, SunIcon } from "lucide-react"
 import { cn } from "cn"
 
 import { EmojiArtwork } from "@/components/emoji-artwork"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toggle } from "@/components/ui/toggle"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -24,8 +26,10 @@ const DISCORD_SIZES = [
   { label: "Jumbo", size: 48 },
 ]
 
+const MAX_GAP = 32
+
 const GROUND_CLASS: Record<Ground, string> = {
-  dark: "bg-muted",
+  dark: "bg-transparent",
   light: "bg-white",
 }
 
@@ -41,6 +45,8 @@ export function EmojiPreview({
 }) {
   const { dataUri, isLoading } = useAssetDataUri(state.asset)
   const [ground, setGround] = useState<Ground>("dark")
+  const [gap, setGap] = useState(0)
+  const gapId = useId()
   const emojiSections = sections(state)
 
   return (
@@ -54,6 +60,24 @@ export function EmojiPreview({
           <ScissorsIcon data-icon="inline-start" />
           Split {SPLIT_WIDTH} px
         </Toggle>
+        <Field orientation="horizontal" className="w-auto">
+          <FieldLabel htmlFor={gapId}>Gap (px)</FieldLabel>
+          <Input
+            id={gapId}
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={MAX_GAP}
+            step={1}
+            value={gap}
+            disabled={!state.split}
+            className="w-16"
+            onChange={(event) => {
+              const next = Math.round(Number(event.target.value))
+              if (Number.isFinite(next)) setGap(Math.min(MAX_GAP, Math.max(0, next)))
+            }}
+          />
+        </Field>
         <ToggleGroup
           aria-label="Preview ground"
           spacing={0}
@@ -77,7 +101,10 @@ export function EmojiPreview({
             <dt className="text-sm tracking-label text-muted-foreground uppercase">
               {label} {size} px
             </dt>
-            <dd className={cn("flex w-fit p-3", GROUND_CLASS[ground])}>
+            <dd
+              className={cn("flex w-fit p-3", GROUND_CLASS[ground])}
+              style={{ gap: state.split ? gap : 0 }}
+            >
               {isLoading ? (
                 <Skeleton style={{ width: size, height: size }} />
               ) : (

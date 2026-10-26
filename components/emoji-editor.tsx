@@ -41,7 +41,7 @@ export function EmojiEditor() {
         <TabsContent value="canvas">
           <EmojiCanvas state={state} dispatch={dispatch} />
         </TabsContent>
-        <TabsContent value="preview">
+        <TabsContent value="preview" keepMounted>
           <EmojiPreview state={state} dispatch={dispatch} />
         </TabsContent>
       </Tabs>
