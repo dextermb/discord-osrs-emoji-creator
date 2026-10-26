@@ -56,4 +56,5 @@ values.
 - The `outline` button and the layer rows invert on hover and focus: white
   fill, black text. A selected layer row stays inverted.
 - The `destructive` button is a red outline. It fills red on hover and focus.
-- A pressed toggle (a lock) is filled white.
+- A pressed toggle (a lock, the split, the preview ground) is filled white.
+- A tab inverts on hover and focus. The active tab stays inverted.

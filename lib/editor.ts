@@ -15,6 +15,8 @@ import {
 export const CANVAS_HEIGHT = 128
 export const ICON_SLOT = 128
 export const BACKGROUND_MAX_HEIGHT = 512
+export const SPLIT_WIDTH = 128
+export const DEFAULT_TEXT_COLOUR = "#ffffff"
 
 const TEXT_GAP = 8
 const TEXT_PADDING = 8
@@ -44,8 +46,10 @@ export type EditorState = {
   asset: IconAsset | null
   icon: Placement
   iconBasis: Size | null
-  text: { value: string; box: Box; placement: Placement }
+  text: { value: string; box: Box; placement: Placement; colour: string }
   background: Background | null
+  canvasColour: string | null
+  split: boolean
   rect: { placement: RectPlacement; style: RectStyle } | null
   selection: Selection | null
   locked: Record<ElementId, boolean>
@@ -54,6 +58,9 @@ export type EditorState = {
 export type EditorAction =
   | { type: "selectAsset"; asset: IconAsset | null }
   | { type: "setText"; value: string }
+  | { type: "setTextColour"; colour: string }
+  | { type: "setCanvasColour"; colour: string | null }
+  | { type: "setSplit"; split: boolean }
   | { type: "textMeasured"; box: Box }
   | { type: "setBackground"; background: Background | null }
   | { type: "addRect" }
@@ -122,8 +129,11 @@ export function initialEditorState(asset: IconAsset | null): EditorState {
         scale: 1,
         rotation: 0,
       },
+      colour: DEFAULT_TEXT_COLOUR,
     },
     background: null,
+    canvasColour: null,
+    split: false,
     rect: null,
     selection: null,
     locked: { icon: false, text: false, rect: false },
@@ -151,6 +161,17 @@ export function contentWidth(state: EditorState) {
 export function canvasWidth(state: EditorState) {
   const rectRight = state.rect ? rectBounds(state.rect.placement).maxX : 0
   return canvasWidthFrom([contentWidth(state), rectRight])
+}
+
+export type Section = { x: number; width: number }
+
+export function sections(state: EditorState): Section[] {
+  const width = canvasWidth(state)
+  if (!state.split) return [{ x: 0, width }]
+  return Array.from({ length: Math.ceil(width / SPLIT_WIDTH) }, (_, index) => ({
+    x: index * SPLIT_WIDTH,
+    width: SPLIT_WIDTH,
+  }))
 }
 
 export function rectInsets(state: EditorState): Insets | null {
@@ -220,6 +241,12 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       }
     case "setText":
       return { ...state, text: { ...state.text, value: action.value } }
+    case "setTextColour":
+      return { ...state, text: { ...state.text, colour: action.colour } }
+    case "setCanvasColour":
+      return { ...state, canvasColour: action.colour }
+    case "setSplit":
+      return { ...state, split: action.split }
     case "textMeasured": {
       const { box, placement } = state.text
       if (sameBox(box, action.box)) return state

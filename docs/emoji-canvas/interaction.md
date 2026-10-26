@@ -3,6 +3,13 @@
 The layer list and the panel, the locks, the gestures, and the loading and
 error states. Back to [emoji-canvas.md](../emoji-canvas.md).
 
+## Tabs
+
+The heading strip above the canvas holds two tabs: "Canvas" and "Preview". The
+active tab is inverted. "Canvas" is the editor. "Preview" shows the emoji at
+the Discord sizes, see [preview.md](./preview.md). The layer list and the
+panel stay below both tabs, so the user can change the emoji in the preview.
+
 ## Layer list and panel
 
 Below the canvas, the "Layers" list is on the left and the panel of the
@@ -22,7 +29,8 @@ Rectangle and Background. Each row uses the shadcn `Item` component.
   `aria-pressed`. It sends `setLocked`. The background has no lock.
 
 `LayerPanel` shows the controls of the selection: the icon picker, the "Text"
-input, the rectangle controls, or the background field. With no selection, it
+input and its colour, the rectangle controls, or the canvas colour and the
+background image. With no selection, it
 shows a hint. All four panels stay mounted and only the selected one shows, so
 the icon picker keeps its category and the inputs keep their drafts.
 
