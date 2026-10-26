@@ -15,8 +15,10 @@ EditorState
   asset:      IconAsset | null             sprite or item, see icon-picker.md
   icon:       Placement
   iconBasis:  { width, height } | null    natural size of the last icon
-  text:       { value, box: Box, placement: Placement }
-  background: { dataUri, name } | null
+  text:         { value, box: Box, placement: Placement, colour }
+  background:   { dataUri, name } | null
+  canvasColour: string | null              null = transparent
+  split:        boolean                    cut into 128 px sections, see preview.md
   rect:       { placement: RectPlacement, style: RectStyle } | null
   selection:  "icon" | "text" | "rect" | "background" | null
   locked:     { icon, text, rect: boolean }
@@ -24,18 +26,36 @@ EditorState
 
 ```
 EmojiEditor ── useReducer(editorReducer) ──▶ state
+  ├─ TextMeasure: hidden <text> getBBox ─────▶ textMeasured
+  ├─ tab "Canvas":  EmojiCanvas
+  │    ├─ EmojiArtwork                         the layers, see below
+  │    └─ pointer, keyboard ─────────────────▶ set*Placement, moveBy, select
+  ├─ tab "Preview": EmojiPreview
+  │    ├─ split toggle ──────────────────────▶ setSplit
+  │    └─ sections(state) ─▶ one <svg> each ─▶ EmojiArtwork
   ├─ LayerList ──────────────────────────────▶ select, setLocked
   ├─ "Add rectangle" (no rectangle) ─────────▶ addRect
   ├─ LayerPanel                                one panel for the selection
   │    ├─ IconPicker ────────────────────────▶ selectAsset
-  │    ├─ TextField ─────────────────────────▶ setText
+  │    ├─ TextField ─────────────────────────▶ setText, setTextColour
   │    ├─ ShapeControls ─────────────────────▶ addRect, removeRect, setRectStyle,
   │    │                                        setRectInsets
+  │    ├─ CanvasColourField ─────────────────▶ setCanvasColour
   │    └─ BackgroundField ─ readImageAsDataUri ▶ setBackground
-  └─ EmojiCanvas
-       ├─ pointer, keyboard ─────────────────▶ set*Placement, moveBy, select
-       └─ <text> getBBox ────────────────────▶ textMeasured
 ```
+
+`TextMeasure` is a separate, invisible SVG that is always mounted. Thus the
+text box stays correct while the "Preview" tab is open and the canvas is not
+mounted. It uses `visibility: hidden`, because `getBBox()` gives no box for an
+element with `display: none`.
+
+## One artwork, two views
+
+`EmojiArtwork` renders the layers below, with no event handlers. It takes an
+optional `wrapLayer` function. `EmojiCanvas` passes a function that wraps the
+rectangle, the icon and the text in a focusable group with the gestures. The
+preview uses the plain default. Each instance has its own `useId`, so the clip
+and filter IDs do not collide.
 
 ## Layers
 
@@ -43,6 +63,7 @@ From the bottom to the top:
 
 ```
 <svg>                               clip-path = canvas
+  ├─ canvas colour  <rect>, full canvas, only when set
   ├─ no rectangle:  background <image>, full canvas
   ├─ rectangle:     <g filter=drop-shadow>
   │                   ├─ background <image>, full canvas, clip-path = rectangle

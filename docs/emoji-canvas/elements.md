@@ -1,7 +1,20 @@
 # Emoji canvas: elements
 
-The background image, the icon, the text and the rectangle: their sources,
-placement and style. Back to [emoji-canvas.md](../emoji-canvas.md).
+The canvas colour, the background image, the icon, the text and the
+rectangle: their sources, placement and style. Back to
+[emoji-canvas.md](../emoji-canvas.md).
+
+## Canvas colour
+
+- The "Canvas colour" input is in the "Background" panel, above the image.
+- The default is no colour, so the emoji is transparent. A transparent emoji
+  looks correct on every Discord theme.
+- A colour fills the full canvas below all layers. It does not clip to the
+  rectangle (the background image does).
+- "Remove" sets the colour back to none. With no colour, the input shows
+  `#000000`.
+- The grey ground of the editor (`bg-muted`) is not part of the emoji. It shows
+  where the emoji is transparent.
 
 ## Background image
 
@@ -120,6 +133,10 @@ bottom = 128 - (cy + height / 2)
 
 ## Text style
 
-The text uses Geist, 48 px, bold, with `fill="currentColor"`. The interface
-font is Geist Mono, so the `<svg>` sets `font-sans`. See [theme.md](../theme.md).
-A font selection is a planned change.
+The text uses Geist, 48 px, bold. The interface font is Geist Mono, so the
+`<svg>` sets `font-sans`. See [theme.md](../theme.md). `TEXT_ATTRIBUTES` in
+`components/emoji-artwork.tsx` holds the font values, so the artwork and the
+measurement use the same font.
+
+The colour input at the left of the "Text" input sets `text.colour`. The
+default is `#ffffff`.

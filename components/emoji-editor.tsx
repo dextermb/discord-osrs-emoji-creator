@@ -2,12 +2,16 @@
 
 import { useReducer } from "react"
 import { SquarePlusIcon } from "lucide-react"
+import { cn } from "cn"
 
 import { EmojiCanvas } from "@/components/emoji-canvas"
+import { EmojiPreview } from "@/components/emoji-preview"
 import { LayerList } from "@/components/layer-list"
 import { LayerPanel } from "@/components/layer-panel"
-import { PanelHeading } from "@/components/panel-heading"
+import { panelHeadingClass } from "@/components/panel-heading"
+import { TextMeasure } from "@/components/text-measure"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DEV_ASSET, DEV_CATEGORY_SLUG, DEV_SPRITE_SVG } from "@/lib/dev-fixture"
 import { editorReducer, initialEditorState } from "@/lib/editor"
 import { cacheAssetSvg } from "@/lib/osrsclans"
@@ -28,10 +32,19 @@ export function EmojiEditor() {
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      <section aria-label="Canvas" className="border-b">
-        <PanelHeading>Canvas</PanelHeading>
-        <EmojiCanvas state={state} dispatch={dispatch} />
-      </section>
+      <TextMeasure value={state.text.value} dispatch={dispatch} />
+      <Tabs defaultValue="canvas" className="border-b">
+        <TabsList aria-label="View" className={cn(panelHeadingClass, "justify-start gap-0 p-0")}>
+          <TabsTrigger value="canvas">Canvas</TabsTrigger>
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+        </TabsList>
+        <TabsContent value="canvas">
+          <EmojiCanvas state={state} dispatch={dispatch} />
+        </TabsContent>
+        <TabsContent value="preview">
+          <EmojiPreview state={state} dispatch={dispatch} />
+        </TabsContent>
+      </Tabs>
       <div className="grid flex-1 grid-cols-1 content-start min-[900px]:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] min-[900px]:content-stretch">
         <div className="flex min-w-0 flex-col border-b min-[900px]:border-r min-[900px]:border-b-0">
           <LayerList state={state} dispatch={dispatch} />

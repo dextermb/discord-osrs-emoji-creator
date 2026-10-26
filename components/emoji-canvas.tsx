@@ -1,17 +1,19 @@
 "use client"
 
 import {
-  useEffect,
-  useId,
-  useLayoutEffect,
   useRef,
-  useState,
   type Dispatch,
   type KeyboardEvent,
   type PointerEvent,
   type ReactNode,
 } from "react"
 
+import {
+  EmojiArtwork,
+  rotationTransform,
+  scaledBox,
+  type LayerWrapper,
+} from "@/components/emoji-artwork"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAssetDataUri } from "@/hooks/use-asset-data-uri"
@@ -23,7 +25,6 @@ import {
   type EditorAction,
   type EditorState,
   type ElementId,
-  type RectStyle,
 } from "@/lib/editor"
 import {
   moveBy,
@@ -40,13 +41,10 @@ import {
   type RectPlacement,
 } from "@/lib/placement"
 
-const FONT_SIZE = 48
 const HANDLE_SIZE = 8
 const ROTATE_HANDLE_OFFSET = 20
 const NUDGE = 1
 const NUDGE_LARGE = 10
-const SHADOW_OFFSET_Y = 2
-const SHADOW_OPACITY = 0.5
 
 const ARROW_DIRECTIONS: Record<string, Point> = {
   ArrowLeft: { x: -1, y: 0 },
@@ -73,27 +71,6 @@ type Drag = {
   startIcon: Placement
   startText: Placement
   startRect: RectPlacement | null
-}
-
-function scaledBox(box: Box, scale: number): Box {
-  return {
-    x: box.x * scale,
-    y: box.y * scale,
-    width: box.width * scale,
-    height: box.height * scale,
-  }
-}
-
-function rotationTransform({
-  cx,
-  cy,
-  rotation,
-}: {
-  cx: number
-  cy: number
-  rotation: number
-}) {
-  return `translate(${cx} ${cy}) rotate(${rotation})`
 }
 
 function toSvgPoint(svg: SVGSVGElement, event: PointerEvent): Point {
@@ -151,40 +128,13 @@ export function EmojiCanvas({
   state: EditorState
   dispatch: Dispatch<EditorAction>
 }) {
-  const { asset, icon, text, background, rect, locked } = state
+  const { asset, icon, text, rect, locked } = state
   const { dataUri, isLoading, failed } = useAssetDataUri(asset)
-  const idPrefix = useId()
-  const canvasClipId = `${idPrefix}canvas`
-  const rectClipId = `${idPrefix}rect`
-  const shadowId = `${idPrefix}shadow`
   const svgRef = useRef<SVGSVGElement>(null)
-  const textRef = useRef<SVGTextElement>(null)
   const dragRef = useRef<Drag | null>(null)
-  const [fontEpoch, setFontEpoch] = useState(0)
-
-  useEffect(() => {
-    const remeasure = () => setFontEpoch((epoch) => epoch + 1)
-    document.fonts.addEventListener("loadingdone", remeasure)
-    return () => document.fonts.removeEventListener("loadingdone", remeasure)
-  }, [])
-
-  useLayoutEffect(() => {
-    const element = textRef.current
-    const measured = element && text.value ? element.getBBox() : null
-    dispatch({
-      type: "textMeasured",
-      box: {
-        x: measured?.x ?? 0,
-        y: measured?.y ?? 0,
-        width: measured?.width ?? 0,
-        height: measured?.height ?? 0,
-      },
-    })
-  }, [text.value, fontEpoch, dispatch])
 
   const hasIcon = asset !== null && dataUri !== null
-  const textVisible = hasText(state)
-  const exists = { icon: hasIcon, text: textVisible, rect: rect !== null }
+  const exists = { icon: hasIcon, text: hasText(state), rect: rect !== null }
   const selection = state.selection === "background" ? null : state.selection
   const selected =
     selection && exists[selection] && !locked[selection] ? selection : null
@@ -269,20 +219,23 @@ export function EmojiCanvas({
     }
   }
 
+  const wrapLayer: LayerWrapper = (element, { label, hidden, transform, children }) => (
+    <ElementGroup
+      label={label}
+      hidden={hidden}
+      locked={locked[element]}
+      transform={transform}
+      onPointerDown={(event) => startGesture(element, "move", event)}
+      onFocus={() => select(element)}
+      onKeyDown={(event) => handleKeyDown(element, event)}
+    >
+      {children}
+    </ElementGroup>
+  )
+
   if (isLoading) {
     return <Skeleton className="size-32" />
   }
-
-  const backgroundImage = background && (
-    <image
-      href={background.dataUri}
-      width={width}
-      height={CANVAS_HEIGHT}
-      preserveAspectRatio="xMidYMid slice"
-      pointerEvents="none"
-      clipPath={rect ? `url(#${rectClipId})` : undefined}
-    />
-  )
 
   return (
     <div className="flex flex-col gap-4">
@@ -297,94 +250,14 @@ export function EmojiCanvas({
           width={width}
           height={CANVAS_HEIGHT}
           viewBox={`0 0 ${width} ${CANVAS_HEIGHT}`}
-          aria-label="Emoji preview"
+          aria-label="Emoji canvas"
           className="block touch-none overflow-visible bg-muted font-sans select-none"
           onPointerDown={() => select(null)}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerEnd}
           onPointerCancel={handlePointerEnd}
         >
-          <defs>
-            <clipPath id={canvasClipId}>
-              <rect width={width} height={CANVAS_HEIGHT} />
-            </clipPath>
-            {rect && (
-              <clipPath id={rectClipId}>
-                <rect
-                  {...rectLocalBox(rect.placement)}
-                  rx={rect.style.radius}
-                  transform={rotationTransform(rect.placement)}
-                />
-              </clipPath>
-            )}
-            {rect && rect.style.shadowBlur > 0 && (
-              <ShadowFilter id={shadowId} style={rect.style} />
-            )}
-          </defs>
-          <g clipPath={`url(#${canvasClipId})`}>
-            {!rect && backgroundImage}
-            {rect && (
-              <g
-                filter={
-                  rect.style.shadowBlur > 0 ? `url(#${shadowId})` : undefined
-                }
-              >
-                {backgroundImage}
-                <ElementGroup
-                  label="Rectangle"
-                  locked={locked.rect}
-                  transform={rotationTransform(rect.placement)}
-                  onPointerDown={(event) => startGesture("rect", "move", event)}
-                  onFocus={() => select("rect")}
-                  onKeyDown={(event) => handleKeyDown("rect", event)}
-                >
-                  <rect
-                    {...rectLocalBox(rect.placement)}
-                    rx={rect.style.radius}
-                    fill={rect.style.fill}
-                    fillOpacity={rect.style.fillOpacity}
-                    stroke={rect.style.strokeWidth > 0 ? rect.style.stroke : "none"}
-                    strokeWidth={rect.style.strokeWidth}
-                  />
-                </ElementGroup>
-              </g>
-            )}
-            {hasIcon && (
-              <ElementGroup
-                label={`Icon: ${asset.name}`}
-                locked={locked.icon}
-                transform={rotationTransform(icon)}
-                onPointerDown={(event) => startGesture("icon", "move", event)}
-                onFocus={() => select("icon")}
-                onKeyDown={(event) => handleKeyDown("icon", event)}
-              >
-                <image
-                  href={dataUri}
-                  {...scaledBox(iconLocalBox(asset), icon.scale)}
-                />
-              </ElementGroup>
-            )}
-            <ElementGroup
-              label={`Text: ${text.value}`}
-              hidden={!textVisible}
-              locked={locked.text}
-              transform={`${rotationTransform(text.placement)} scale(${text.placement.scale})`}
-              onPointerDown={(event) => startGesture("text", "move", event)}
-              onFocus={() => select("text")}
-              onKeyDown={(event) => handleKeyDown("text", event)}
-            >
-              <text
-                ref={textRef}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fontSize={FONT_SIZE}
-                fontWeight={700}
-                fill="currentColor"
-              >
-                {text.value}
-              </text>
-            </ElementGroup>
-          </g>
+          <EmojiArtwork state={state} dataUri={dataUri} wrapLayer={wrapLayer} />
           {selected && (
             <SelectionHandles
               {...selectionFrame(selected)}
@@ -435,20 +308,6 @@ function ElementGroup({
     >
       {children}
     </g>
-  )
-}
-
-function ShadowFilter({ id, style }: { id: string; style: RectStyle }) {
-  return (
-    <filter id={id} x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow
-        dx={0}
-        dy={SHADOW_OFFSET_Y}
-        stdDeviation={style.shadowBlur / 2}
-        floodColor={style.shadow}
-        floodOpacity={SHADOW_OPACITY}
-      />
-    </filter>
   )
 }
 
