@@ -9,10 +9,12 @@ import { textFontStyle, type TextFont } from "@/lib/fonts"
 export function TextMeasure({
   value,
   font,
+  fontLoading,
   dispatch,
 }: {
   value: string
   font: TextFont
+  fontLoading: boolean
   dispatch: Dispatch<EditorAction>
 }) {
   const textRef = useRef<SVGTextElement>(null)
@@ -36,7 +38,7 @@ export function TextMeasure({
         height: measured?.height ?? 0,
       },
     })
-  }, [value, font, fontEpoch, dispatch])
+  }, [value, font, fontLoading, fontEpoch, dispatch])
 
   return (
     <svg
