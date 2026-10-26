@@ -4,7 +4,8 @@ The emoji canvas is an SVG on the home page. It holds a canvas colour, a
 background image, one rectangle, the selected icon, and the text from the
 "Text" input. The user can click the rectangle, the icon or the text, and then
 move, resize and rotate it with grab handles. The "Preview" tab shows the emoji
-at the Discord display sizes. For the icon picker, see
+at the Discord display sizes. The "Chat" tab shows it in Discord messages. For
+the icon picker, see
 [icon-picker.md](./icon-picker.md).
 
 ## Files
@@ -18,6 +19,10 @@ at the Discord display sizes. For the icon picker, see
 | `components/emoji-artwork.tsx`     | The SVG layers of the emoji, with no handlers. The canvas and the preview use it. |
 | `components/text-measure.tsx`      | A hidden `<text>` that measures the text and sends `textMeasured`. |
 | `components/emoji-preview.tsx`     | The "Preview" tab: the split toggle, the ground toggle, the Discord sizes. |
+| `components/emoji-section.tsx`     | One section of the emoji as an `<svg>` at a given size.   |
+| `components/emoji-chat.tsx`        | The "Chat" tab: the controls, the channel, the size list. |
+| `components/discord-message.tsx`   | One Discord message, the reply line, a reaction pill.     |
+| `lib/discord.ts`                   | The Discord themes, sizes and spacings.                   |
 | `components/layer-panel.tsx`       | The controls of the selected layer, and the "Text" input. |
 | `components/panel-heading.tsx`     | The heading strip above the canvas, the list and the panel. |
 | `components/emoji-canvas.tsx`      | The "Canvas" tab: the artwork, the handles, and the gestures. |
@@ -34,5 +39,6 @@ at the Discord display sizes. For the icon picker, see
 | [emoji-canvas/elements.md](./emoji-canvas/elements.md)       | The canvas colour, the background, the icon, the text and the rectangle: placement, insets and style. |
 | [emoji-canvas/interaction.md](./emoji-canvas/interaction.md) | The layer list and the panel, the locks, the gestures, loading and errors. |
 | [emoji-canvas/preview.md](./emoji-canvas/preview.md)         | The "Preview" tab: the Discord sizes, the split, the ground. |
+| [emoji-canvas/chat.md](./emoji-canvas/chat.md)               | The "Chat" tab: the Discord messages, sizes, themes and sources. |
 
 For the colours, the fonts and the component styles, see [theme.md](./theme.md).

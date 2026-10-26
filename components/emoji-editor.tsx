@@ -5,6 +5,7 @@ import { SquarePlusIcon } from "lucide-react"
 import { cn } from "cn"
 
 import { EmojiCanvas } from "@/components/emoji-canvas"
+import { EmojiChat } from "@/components/emoji-chat"
 import { EmojiPreview } from "@/components/emoji-preview"
 import { LayerList } from "@/components/layer-list"
 import { LayerPanel } from "@/components/layer-panel"
@@ -37,12 +38,16 @@ export function EmojiEditor() {
         <TabsList aria-label="View" className={cn(panelHeadingClass, "justify-start gap-0 p-0")}>
           <TabsTrigger value="canvas">Canvas</TabsTrigger>
           <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="chat">Chat</TabsTrigger>
         </TabsList>
         <TabsContent value="canvas">
           <EmojiCanvas state={state} dispatch={dispatch} />
         </TabsContent>
         <TabsContent value="preview" keepMounted>
           <EmojiPreview state={state} dispatch={dispatch} />
+        </TabsContent>
+        <TabsContent value="chat" keepMounted>
+          <EmojiChat state={state} dispatch={dispatch} />
         </TabsContent>
       </Tabs>
       <div className="grid flex-1 grid-cols-1 content-start min-[900px]:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] min-[900px]:content-stretch">

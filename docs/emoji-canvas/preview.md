@@ -1,7 +1,8 @@
 # Emoji canvas: preview
 
 The "Preview" tab shows the emoji at the sizes that Discord shows it. Back to
-[emoji-canvas.md](../emoji-canvas.md).
+[emoji-canvas.md](../emoji-canvas.md). For the emoji in Discord messages, see
+[chat.md](./chat.md).
 
 ## Discord sizes
 
@@ -10,9 +11,9 @@ The "Preview" tab shows the emoji at the sizes that Discord shows it. Back to
 | Inline | 22 px | An emoji in a line of text.     |
 | Jumbo  | 48 px | A message that holds only emoji. |
 
-These sizes come from Discord community posts, not from a Discord document.
 Discord shows each emoji in a square. A wide image gets smaller to fit the
-square, with empty space above and below it.
+square, with empty space above and below it. [chat.md](./chat.md) gives all
+the sizes and their sources.
 
 ## Split
 
@@ -37,14 +38,15 @@ Each section has the full 128 px width. The last section gets a transparent
 strip at its right. Discord centres a narrow image in its square, so a narrow
 last section would show a gap.
 
-Each section is an `<svg>` with `viewBox="x 0 width 128"` that renders the
-same `EmojiArtwork`.
+Each section is an `EmojiSection`: an `<svg>` with `viewBox="x 0 width 128"`
+that renders the same `EmojiArtwork`.
 
 ## Gap
 
 The "Gap (px)" input (0–32, default 0) sets the space between the emoji in the
-preview, in screen pixels. Use it to copy the margin that Discord adds between
-emoji.
+preview, in screen pixels. Discord adds no margin between emoji: emoji that
+the user types together touch, as with a gap of 0. A space character between
+the emoji gives a gap of one space width. Use the input to see that case.
 
 - The gap is only in the preview. The sections do not change: section 2 still
   starts at canvas x = 128, so no canvas pixels are skipped.
