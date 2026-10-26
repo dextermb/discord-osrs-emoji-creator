@@ -2,12 +2,12 @@
 
 import type { Dispatch } from "react"
 import {
+  FrameIcon,
   ImageIcon,
   LockIcon,
   LockOpenIcon,
   SquareIcon,
   TypeIcon,
-  WallpaperIcon,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "cn"
@@ -24,11 +24,13 @@ import {
   ItemTitle,
 } from "@/components/ui/item"
 import { Toggle } from "@/components/ui/toggle"
-import type {
-  EditorAction,
-  EditorState,
-  ElementId,
-  Selection,
+import {
+  CANVAS_HEIGHT,
+  canvasBox,
+  type EditorAction,
+  type EditorState,
+  type ElementId,
+  type Selection,
 } from "@/lib/editor"
 
 type Layer = {
@@ -40,7 +42,7 @@ type Layer = {
 }
 
 function layersOf(state: EditorState): Layer[] {
-  const { asset, text, rect, background } = state
+  const { asset, text, rect } = state
   const layers: Layer[] = [
     {
       id: "text",
@@ -65,10 +67,10 @@ function layersOf(state: EditorState): Layer[] {
     layers.push({ id: "rect", label: "Rectangle", detail: null, icon: SquareIcon, lock: "rect" })
   }
   layers.push({
-    id: "background",
-    label: "Background",
-    detail: background?.name ?? "No image",
-    icon: WallpaperIcon,
+    id: "canvas",
+    label: "Canvas",
+    detail: `${canvasBox(state).width} × ${CANVAS_HEIGHT} px`,
+    icon: FrameIcon,
     lock: null,
   })
   return layers

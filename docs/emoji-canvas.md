@@ -1,7 +1,7 @@
 # Emoji canvas
 
 The emoji canvas is an SVG on the home page. It holds a canvas colour, a
-background image, one rectangle, the selected icon, and the text from the
+background image, left and right padding, one rectangle, the selected icon, and the text from the
 "Text" input, in a Google font or an uploaded font. The user can click the
 rectangle, the icon or the text, and then move, resize and rotate it with grab
 handles. The "Preview" tab shows the emoji at the Discord display sizes. The
@@ -12,7 +12,7 @@ files for Discord. For the icon picker, see [icon-picker.md](./icon-picker.md).
 
 | File                               | Purpose                                                   |
 | ---------------------------------- | --------------------------------------------------------- |
-| `lib/editor.ts`                    | The editor state, the actions, the reducer, `canvasWidth`. |
+| `lib/editor.ts`                    | The editor state, the actions, the reducer, `canvasBox`. |
 | `lib/placement.ts`                 | The placement types and the pure geometry functions.      |
 | `lib/image.ts`                     | `readImageAsDataUri`: reduce an upload to a data URI.     |
 | `components/emoji-editor.tsx`      | Holds the reducer. Renders the tabs, the layer list and the layer panel. |
@@ -25,13 +25,14 @@ files for Discord. For the icon picker, see [icon-picker.md](./icon-picker.md).
 | `lib/discord.ts`                   | The Discord themes, sizes and spacings.                   |
 | `components/emoji-export.tsx`      | The "Export" tab: the format, the file rows, the downloads. |
 | `lib/export.ts`                    | The export formats, the file names, the render and the ZIP. |
-| `components/layer-panel.tsx`       | The controls of the selected layer, and the "Text" input. |
+| `components/layer-panel.tsx`       | The controls of the selected layer, the "Text" input, and the "Canvas" panel. |
 | `components/font-field.tsx`        | The "Font", "Weight" and "Upload font" fields.          |
 | `lib/fonts.ts`                     | The text font: the style, the Google load, the upload.    |
 | `components/panel-heading.tsx`     | The heading strip above the canvas, the list and the panel. |
 | `components/emoji-canvas.tsx`      | The "Canvas" tab: the artwork, the handles, and the gestures. |
 | `components/background-field.tsx`  | The background image file input and the remove button.   |
 | `components/shape-controls.tsx`    | The rectangle buttons, insets and style controls.         |
+| `components/number-field.tsx`      | A whole-pixel number input: the insets and the padding.   |
 | `components/layer-list.tsx`        | The "Layers" list: select each layer, lock each element.  |
 | `hooks/use-asset-data-uri.ts`      | The icon SVG as a data URI: cache, fetch, and state.      |
 
@@ -40,7 +41,7 @@ files for Discord. For the icon picker, see [icon-picker.md](./icon-picker.md).
 | Page                                                  | Read it for                                               |
 | ----------------------------------------------------- | --------------------------------------------------------- |
 | [emoji-canvas/state.md](./emoji-canvas/state.md)             | The editor state, the actions, the SVG layers, the canvas width. |
-| [emoji-canvas/elements.md](./emoji-canvas/elements.md)       | The canvas colour, the background, the icon, the text and the rectangle: placement, insets and style. |
+| [emoji-canvas/elements.md](./emoji-canvas/elements.md)       | The canvas (colour, image, padding), the icon, the text and the rectangle: placement, insets and style. |
 | [emoji-canvas/fonts.md](./emoji-canvas/fonts.md)             | The text font: the Google Fonts list, the upload, the weight, the load. |
 | [emoji-canvas/interaction.md](./emoji-canvas/interaction.md) | The layer list and the panel, the locks, the gestures, loading and errors. |
 | [emoji-canvas/preview.md](./emoji-canvas/preview.md)         | The "Preview" tab: the Discord sizes, the split, the ground. |

@@ -12,7 +12,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAssetDataUri } from "@/hooks/use-asset-data-uri"
 import type { FontStatus } from "@/hooks/use-text-font"
-import { CANVAS_HEIGHT, canvasWidth, hasText, sections, type EditorState } from "@/lib/editor"
+import { CANVAS_HEIGHT, canvasBox, hasText, sections, type EditorState } from "@/lib/editor"
 import {
   canEncode,
   canvasFont,
@@ -82,7 +82,8 @@ export function EmojiExport({
   const [result, setResult] = useState<ExportResult | null>(null)
   const [unsupported, setUnsupported] = useState<ExportFormat[]>([])
   const loading = isLoading || fontStatus.isLoading
-  const width = canvasWidth(state)
+  const box = canvasBox(state)
+  const { width } = box
   const splitCount = sections({ ...state, split: true }).length
 
   useEffect(() => {
@@ -109,7 +110,7 @@ export function EmojiExport({
       const files = await exportFiles(
         serializeSvg(svg),
         text,
-        canvasWidth(state),
+        canvasBox(state),
         sections({ ...state, split: true }),
         format
       )
@@ -149,7 +150,7 @@ export function EmojiExport({
           xmlns="http://www.w3.org/2000/svg"
           width={width}
           height={CANVAS_HEIGHT}
-          viewBox={`0 0 ${width} ${CANVAS_HEIGHT}`}
+          viewBox={`${box.x} 0 ${width} ${CANVAS_HEIGHT}`}
 >
           <EmojiArtwork state={state} dataUri={dataUri} />
         </svg>

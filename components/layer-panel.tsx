@@ -6,27 +6,42 @@ import { Trash2Icon } from "lucide-react"
 import { BackgroundField } from "@/components/background-field"
 import { FontField } from "@/components/font-field"
 import { IconPicker } from "@/components/icon-picker"
+import { NumberField } from "@/components/number-field"
 import { PanelHeading } from "@/components/panel-heading"
 import { ShapeControls } from "@/components/shape-controls"
 import { Button } from "@/components/ui/button"
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import type { FontStatus } from "@/hooks/use-text-font"
 import {
+  MAX_PADDING,
   rectInsets,
   type EditorAction,
   type EditorState,
+  type Padding,
   type Selection,
 } from "@/lib/editor"
 
 const MAX_TEXT_LENGTH = 32
 const DEFAULT_CANVAS_COLOUR = "#000000"
 
+const PADDING_SIDES: { side: keyof Padding; label: string }[] = [
+  { side: "left", label: "Left" },
+  { side: "right", label: "Right" },
+]
+
 const TITLES: Record<Selection, string> = {
   icon: "Icon",
   text: "Text",
   rect: "Rectangle",
-  background: "Background",
+  canvas: "Canvas",
 }
 
 export function LayerPanel({
@@ -74,7 +89,7 @@ export function LayerPanel({
             dispatch={dispatch}
           />
         </div>
-        <FieldGroup hidden={selection !== "background"}>
+        <FieldGroup hidden={selection !== "canvas"}>
           <CanvasColourField
             colour={state.canvasColour}
             onColourChange={(colour) => dispatch({ type: "setCanvasColour", colour })}
@@ -84,6 +99,10 @@ export function LayerPanel({
             onBackgroundChange={(background) =>
               dispatch({ type: "setBackground", background })
             }
+          />
+          <PaddingField
+            padding={state.padding}
+            onPaddingChange={(padding) => dispatch({ type: "setPadding", padding })}
           />
         </FieldGroup>
       </div>
@@ -158,5 +177,31 @@ function CanvasColourField({
         )}
       </div>
     </Field>
+  )
+}
+
+function PaddingField({
+  padding,
+  onPaddingChange,
+}: {
+  padding: Padding
+  onPaddingChange: (padding: Partial<Padding>) => void
+}) {
+  return (
+    <FieldSet>
+      <FieldLegend variant="label">Padding (px)</FieldLegend>
+      <FieldGroup className="grid grid-cols-2 gap-3">
+        {PADDING_SIDES.map(({ side, label }) => (
+          <NumberField
+            key={side}
+            label={label}
+            value={padding[side]}
+            min={0}
+            max={MAX_PADDING}
+            onValueChange={(value) => onPaddingChange({ [side]: value })}
+          />
+        ))}
+      </FieldGroup>
+    </FieldSet>
   )
 }

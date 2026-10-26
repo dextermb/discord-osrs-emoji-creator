@@ -17,9 +17,9 @@ Below the canvas, the "Layers" list is on the left and the panel of the
 selected layer is on the right. Under 900 px, the panel goes below the list.
 
 The list has one row for each layer, from the top to the bottom: Text, Icon,
-Rectangle and Background. Each row uses the shadcn `Item` component.
+Rectangle and Canvas. Each row uses the shadcn `Item` component.
 
-- Text, Icon and Background always have a row. With no text or no icon, the
+- Text, Icon and Canvas always have a row. With no text or no icon, the
   row shows "No text" or "No icon", so that its panel stays reachable.
 - The Rectangle row shows only when there is a rectangle. With no rectangle,
   an "Add rectangle" button shows below the list.
@@ -27,17 +27,16 @@ Rectangle and Background. Each row uses the shadcn `Item` component.
   row is inverted (white fill, black text).
 - The lock toggle shows only for an element that exists. It is an icon
   (`LockIcon` or `LockOpenIcon`) with `aria-label` "Lock icon" and so on, and
-  `aria-pressed`. It sends `setLocked`. The background has no lock.
+  `aria-pressed`. It sends `setLocked`. The canvas has no lock.
 
 `LayerPanel` shows the controls of the selection: the icon picker, the "Text"
-input and its colour, the rectangle controls, or the canvas colour and the
-background image. With no selection, it
-shows a hint. All four panels stay mounted and only the selected one shows, so
+input and its colour, the rectangle controls, or the "Canvas" panel (the
+colour, the background image and the padding). With no selection, it shows a
+hint. All four panels stay mounted and only the selected one shows, so
 the icon picker keeps its category and the inputs keep their drafts.
 
-Selecting "background" only opens its panel. The background has no frame and
-no handles on the canvas. A click on the empty canvas clears every selection,
-"background" too.
+Selecting "canvas" only opens its panel. The canvas has no frame and no
+handles. A click on the empty canvas clears every selection, "canvas" too.
 
 ## Locks
 

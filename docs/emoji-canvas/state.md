@@ -19,9 +19,10 @@ EditorState
                   font: TextFont }         see fonts.md
   background:   { dataUri, name } | null
   canvasColour: string | null              null = transparent
+  padding:      { left, right }            whole px, 0–256, see elements.md
   split:        boolean                    cut into 128 px sections, see preview.md
   rect:       { placement: RectPlacement, style: RectStyle } | null
-  selection:  "icon" | "text" | "rect" | "background" | null
+  selection:  "icon" | "text" | "rect" | "canvas" | null
   locked:     { icon, text, rect: boolean }
 ```
 
@@ -49,7 +50,8 @@ EmojiEditor ── useReducer(editorReducer) ──▶ state
   │    ├─ ShapeControls ─────────────────────▶ addRect, removeRect, setRectStyle,
   │    │                                        setRectInsets
   │    ├─ CanvasColourField ─────────────────▶ setCanvasColour
-  │    └─ BackgroundField ─ readImageAsDataUri ▶ setBackground
+  │    ├─ BackgroundField ─ readImageAsDataUri ▶ setBackground
+  │    └─ PaddingField ──────────────────────▶ setPadding
 ```
 
 `TextMeasure` is a separate, invisible SVG that is always mounted. Thus the
@@ -78,8 +80,11 @@ From the bottom to the top:
   │                   └─ <rect> fill + fill-opacity, stroke + stroke-width, rx
   ├─ icon
   ├─ text
+  ├─ padding guides                 "Canvas" tab only, see elements.md
   └─ handles                        outside the canvas clip path
 ```
+
+"Full canvas" is the canvas box, padding included.
 
 - With no rectangle, the background image fills the canvas.
 - With a rectangle, the image shows only inside the rectangle. The rectangle
@@ -91,11 +96,14 @@ From the bottom to the top:
 
 ## Canvas size
 
-The SVG `viewBox` height is always 128.
+The SVG `viewBox` height is always 128. The padding adds width at the left
+and at the right, and the elements keep their coordinates.
 
 ```
 contentWidth = max(128, ceil(max(iconRight, textRight + 8)))
-width        = max(contentWidth, ceil(rectRight))
+areaWidth    = max(contentWidth, ceil(rectRight))
+canvasBox    = { x: -padding.left, width: areaWidth + padding.left + padding.right }
+viewBox      = "canvasBox.x 0 canvasBox.width 128"
 ```
 
 - Each `…Right` value is the right edge of the rotated element box. The shadow
@@ -104,7 +112,11 @@ width        = max(contentWidth, ceil(rectRight))
   "Add rectangle" use it, so that the rectangle does not refer to a width that
   it changes itself.
 - The text has 8 px of space at its right. The icon and the rectangle have none.
-- The canvas clips the elements at the left, top and bottom edges.
+  The right padding adds to this space.
+- The canvas clips the elements at the edges of `canvasBox`. An element in the
+  padding shows, and it does not make the canvas wider.
+- The "Canvas", "Preview", "Chat" and "Export" views all use `canvasBox`. Only
+  `contentWidth` and the rectangle insets ignore the padding.
 - The SVG is left-aligned in a container that scrolls horizontally. A centred
   SVG moves on the screen when its width changes, and that breaks a drag that
   changes the width.

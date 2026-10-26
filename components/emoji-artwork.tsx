@@ -4,7 +4,7 @@ import { useId, type ReactNode } from "react"
 
 import {
   CANVAS_HEIGHT,
-  canvasWidth,
+  canvasBox,
   hasText,
   iconLocalBox,
   type EditorState,
@@ -75,12 +75,13 @@ export function EmojiArtwork({
   const canvasClipId = `${idPrefix}canvas`
   const rectClipId = `${idPrefix}rect`
   const shadowId = `${idPrefix}shadow`
-  const width = canvasWidth(state)
+  const box = canvasBox(state)
 
   const backgroundImage = background && (
     <image
       href={background.dataUri}
-      width={width}
+      x={box.x}
+      width={box.width}
       height={CANVAS_HEIGHT}
       preserveAspectRatio="xMidYMid slice"
       pointerEvents="none"
@@ -92,7 +93,7 @@ export function EmojiArtwork({
     <>
       <defs>
         <clipPath id={canvasClipId}>
-          <rect width={width} height={CANVAS_HEIGHT} />
+          <rect x={box.x} width={box.width} height={CANVAS_HEIGHT} />
         </clipPath>
         {rect && (
           <clipPath id={rectClipId}>
@@ -110,7 +111,8 @@ export function EmojiArtwork({
       <g clipPath={`url(#${canvasClipId})`}>
         {canvasColour && (
           <rect
-            width={width}
+            x={box.x}
+            width={box.width}
             height={CANVAS_HEIGHT}
             fill={canvasColour}
             pointerEvents="none"
