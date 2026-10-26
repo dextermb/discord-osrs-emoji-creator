@@ -17,6 +17,11 @@ import { readImageAsDataUri } from "@/lib/image"
 
 type ReadStatus = "idle" | "reading" | "failed"
 
+export const fileButtonClass = cn(
+  buttonVariants({ variant: "outline" }),
+  "relative cursor-pointer has-focus-visible:border-foreground has-focus-visible:bg-foreground has-focus-visible:text-background has-disabled:pointer-events-none has-disabled:opacity-50"
+)
+
 export function BackgroundField({
   background,
   onBackgroundChange,
@@ -48,12 +53,7 @@ export function BackgroundField({
     <Field data-invalid={failed || undefined}>
       <FieldLabel htmlFor={id}>Background image</FieldLabel>
       <div className="flex flex-wrap items-center gap-2">
-        <span
-          className={cn(
-            buttonVariants({ variant: "outline" }),
-            "relative cursor-pointer has-focus-visible:border-foreground has-focus-visible:bg-foreground has-focus-visible:text-background has-disabled:pointer-events-none has-disabled:opacity-50"
-          )}
-        >
+        <span className={fileButtonClass}>
           <ImageUpIcon data-icon="inline-start" />
           Choose image
           <input

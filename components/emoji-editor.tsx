@@ -13,6 +13,7 @@ import { panelHeadingClass } from "@/components/panel-heading"
 import { TextMeasure } from "@/components/text-measure"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useTextFont } from "@/hooks/use-text-font"
 import { DEV_ASSET, DEV_CATEGORY_SLUG, DEV_SPRITE_SVG } from "@/lib/dev-fixture"
 import { editorReducer, initialEditorState } from "@/lib/editor"
 import { cacheAssetSvg } from "@/lib/osrsclans"
@@ -30,10 +31,11 @@ export function EmojiEditor() {
     INITIAL_ASSET,
     initialEditorState
   )
+  const fontStatus = useTextFont(state.text.font)
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      <TextMeasure value={state.text.value} dispatch={dispatch} />
+      <TextMeasure value={state.text.value} font={state.text.font} dispatch={dispatch} />
       <Tabs defaultValue="canvas" className="border-b">
         <TabsList aria-label="View" className={cn(panelHeadingClass, "justify-start gap-0 p-0")}>
           <TabsTrigger value="canvas">Canvas</TabsTrigger>
@@ -65,6 +67,7 @@ export function EmojiEditor() {
         <LayerPanel
           state={state}
           dispatch={dispatch}
+          fontStatus={fontStatus}
           initialCategorySlug={INITIAL_CATEGORY_SLUG}
         />
       </div>

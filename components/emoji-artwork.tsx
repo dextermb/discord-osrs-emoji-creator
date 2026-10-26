@@ -11,6 +11,7 @@ import {
   type ElementId,
   type RectStyle,
 } from "@/lib/editor"
+import { textFontStyle } from "@/lib/fonts"
 import { rectLocalBox, type Box } from "@/lib/placement"
 
 const SHADOW_OFFSET_Y = 2
@@ -18,7 +19,6 @@ const SHADOW_OPACITY = 0.5
 
 export const TEXT_ATTRIBUTES = {
   fontSize: 48,
-  fontWeight: 700,
   textAnchor: "middle",
   dominantBaseline: "central",
 } as const
@@ -152,7 +152,7 @@ export function EmojiArtwork({
           hidden: !hasText(state),
           transform: `${rotationTransform(text.placement)} scale(${text.placement.scale})`,
           children: (
-            <text {...TEXT_ATTRIBUTES} fill={text.colour}>
+            <text {...TEXT_ATTRIBUTES} style={textFontStyle(text.font)} fill={text.colour}>
               {text.value}
             </text>
           ),

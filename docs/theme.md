@@ -43,13 +43,14 @@ values.
 
 ## Type
 
-- The interface is Geist Mono (`font-mono` on `<html>`). The canvas `<svg>`
-  sets `font-sans`, so the emoji text stays in Geist.
+- The interface is Geist Mono (`font-mono` on `<html>`). The emoji text sets
+  its own font on the `<text>` element. The default is Jim Nightshade
+  (`--font-emoji`). See [emoji-canvas/fonts.md](./emoji-canvas/fonts.md).
 - The Discord copy in the "Chat" tab uses Noto Sans (`--font-discord`) and its
   own colours. See [emoji-canvas/chat.md](./emoji-canvas/chat.md).
 - `text-sm` and `text-base` are 12.75 px, `text-xs` is 11.05 px.
-- `font-medium` is 400. Blackline uses one weight. The canvas text stays bold,
-  because it sets `font-weight` on the `<text>` element.
+- `font-medium` is 400. Blackline uses one weight. The canvas text sets its
+  own `font-weight` on the `<text>` element.
 - Labels, legends, buttons and layer names are uppercase with `tracking-label`
   (0.08 em).
 
