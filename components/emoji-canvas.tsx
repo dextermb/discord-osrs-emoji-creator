@@ -185,12 +185,9 @@ export function EmojiCanvas({
   const hasIcon = asset !== null && dataUri !== null
   const textVisible = hasText(state)
   const exists = { icon: hasIcon, text: textVisible, rect: rect !== null }
+  const selection = state.selection === "background" ? null : state.selection
   const selected =
-    state.selection &&
-    exists[state.selection] &&
-    !locked[state.selection]
-      ? state.selection
-      : null
+    selection && exists[selection] && !locked[selection] ? selection : null
   const width = canvasWidth(state)
 
   function select(selection: ElementId | null) {
@@ -301,7 +298,7 @@ export function EmojiCanvas({
           height={CANVAS_HEIGHT}
           viewBox={`0 0 ${width} ${CANVAS_HEIGHT}`}
           aria-label="Emoji preview"
-          className="block touch-none overflow-visible bg-muted select-none"
+          className="block touch-none overflow-visible bg-muted font-sans select-none"
           onPointerDown={() => select(null)}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerEnd}

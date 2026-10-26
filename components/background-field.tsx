@@ -1,16 +1,16 @@
 "use client"
 
 import { useId, useState, type ChangeEvent } from "react"
-import { Trash2Icon } from "lucide-react"
+import { ImageUpIcon, Trash2Icon } from "lucide-react"
+import { cn } from "cn"
 
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldLabel,
 } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { BACKGROUND_MAX_HEIGHT, type Background } from "@/lib/editor"
 import { readImageAsDataUri } from "@/lib/image"
@@ -47,18 +47,28 @@ export function BackgroundField({
   return (
     <Field data-invalid={failed || undefined}>
       <FieldLabel htmlFor={id}>Background image</FieldLabel>
-      <div className="flex items-center gap-2">
-        <Input
-          id={id}
-          type="file"
-          accept="image/*"
-          disabled={status === "reading"}
-          aria-invalid={failed || undefined}
-          onChange={handleFileChange}
-        />
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "relative cursor-pointer has-focus-visible:border-foreground has-focus-visible:bg-foreground has-focus-visible:text-background has-disabled:pointer-events-none has-disabled:opacity-50"
+          )}
+        >
+          <ImageUpIcon data-icon="inline-start" />
+          Choose image
+          <input
+            id={id}
+            type="file"
+            accept="image/*"
+            disabled={status === "reading"}
+            aria-invalid={failed || undefined}
+            className="absolute inset-0 cursor-pointer opacity-0"
+            onChange={handleFileChange}
+          />
+        </span>
         {status === "reading" && <Spinner />}
         {background && (
-          <Button variant="outline" onClick={() => onBackgroundChange(null)}>
+          <Button variant="destructive" onClick={() => onBackgroundChange(null)}>
             <Trash2Icon data-icon="inline-start" />
             Remove
           </Button>

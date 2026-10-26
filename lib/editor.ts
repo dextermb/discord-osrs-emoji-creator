@@ -22,6 +22,8 @@ const RECT_INSET = 8
 
 export type ElementId = "icon" | "text" | "rect"
 
+export type Selection = ElementId | "background"
+
 export type RectStyle = {
   fill: string
   fillOpacity: number
@@ -45,7 +47,7 @@ export type EditorState = {
   text: { value: string; box: Box; placement: Placement }
   background: Background | null
   rect: { placement: RectPlacement; style: RectStyle } | null
-  selection: ElementId | null
+  selection: Selection | null
   locked: Record<ElementId, boolean>
 }
 
@@ -62,7 +64,7 @@ export type EditorAction =
   | { type: "setTextPlacement"; placement: Placement }
   | { type: "setRectPlacement"; placement: RectPlacement }
   | { type: "moveBy"; element: ElementId; dx: number; dy: number }
-  | { type: "select"; selection: ElementId | null }
+  | { type: "select"; selection: Selection | null }
   | { type: "setLocked"; element: ElementId; locked: boolean }
 
 export const DEFAULT_RECT_STYLE: RectStyle = {
@@ -278,7 +280,12 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       if (state.locked[action.element]) return state
       return moveElement(state, action.element, action.dx, action.dy)
     case "select":
-      if (action.selection && state.locked[action.selection]) return state
+      if (
+        action.selection &&
+        action.selection !== "background" &&
+        state.locked[action.selection]
+      )
+        return state
       return { ...state, selection: action.selection }
     case "setLocked":
       return {

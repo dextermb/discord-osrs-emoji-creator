@@ -18,18 +18,20 @@ EditorState
   text:       { value, box: Box, placement: Placement }
   background: { dataUri, name } | null
   rect:       { placement: RectPlacement, style: RectStyle } | null
-  selection:  "icon" | "text" | "rect" | null
+  selection:  "icon" | "text" | "rect" | "background" | null
   locked:     { icon, text, rect: boolean }
 ```
 
 ```
 EmojiEditor ── useReducer(editorReducer) ──▶ state
-  ├─ IconPicker ─────────────────────────────▶ selectAsset
-  ├─ TextField ──────────────────────────────▶ setText
-  ├─ BackgroundField ─ readImageAsDataUri ───▶ setBackground
-  ├─ ShapeControls ──────────────────────────▶ addRect, removeRect, setRectStyle,
-  │                                             setRectInsets
   ├─ LayerList ──────────────────────────────▶ select, setLocked
+  ├─ "Add rectangle" (no rectangle) ─────────▶ addRect
+  ├─ LayerPanel                                one panel for the selection
+  │    ├─ IconPicker ────────────────────────▶ selectAsset
+  │    ├─ TextField ─────────────────────────▶ setText
+  │    ├─ ShapeControls ─────────────────────▶ addRect, removeRect, setRectStyle,
+  │    │                                        setRectInsets
+  │    └─ BackgroundField ─ readImageAsDataUri ▶ setBackground
   └─ EmojiCanvas
        ├─ pointer, keyboard ─────────────────▶ set*Placement, moveBy, select
        └─ <text> getBBox ────────────────────▶ textMeasured

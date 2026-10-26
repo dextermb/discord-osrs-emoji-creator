@@ -120,5 +120,6 @@ bottom = 128 - (cy + height / 2)
 
 ## Text style
 
-The text uses the app font (Geist), 48 px, bold, with `fill="currentColor"`.
+The text uses Geist, 48 px, bold, with `fill="currentColor"`. The interface
+font is Geist Mono, so the `<svg>` sets `font-sans`. See [theme.md](../theme.md).
 A font selection is a planned change.

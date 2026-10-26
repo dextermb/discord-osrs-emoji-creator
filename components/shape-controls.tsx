@@ -33,7 +33,7 @@ export function ShapeControls({
 
   return (
     <FieldSet>
-      <FieldLegend>Rectangle</FieldLegend>
+      <FieldLegend className="sr-only">Rectangle</FieldLegend>
       {rect ? (
         <FieldGroup>
           {insets && (
@@ -92,7 +92,7 @@ export function ShapeControls({
             onValueChange={(radius) => setStyle({ radius })}
           />
           <Button
-            variant="outline"
+            variant="destructive"
             className="self-start"
             onClick={() => dispatch({ type: "removeRect" })}
           >
