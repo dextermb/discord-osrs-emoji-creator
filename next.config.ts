@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    remotePatterns: [new URL("https://osrsclans.cc/api/v1/osrs/**")],
+  },
   turbopack: {
     rules: {
       "*.css": {
