@@ -1,11 +1,12 @@
 "use client"
 
-import { useReducer } from "react"
+import { useReducer, useState } from "react"
 import { SquarePlusIcon } from "lucide-react"
 import { cn } from "cn"
 
 import { EmojiCanvas } from "@/components/emoji-canvas"
 import { EmojiChat } from "@/components/emoji-chat"
+import { EmojiExport } from "@/components/emoji-export"
 import { EmojiPreview } from "@/components/emoji-preview"
 import { LayerList } from "@/components/layer-list"
 import { LayerPanel } from "@/components/layer-panel"
@@ -16,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useTextFont } from "@/hooks/use-text-font"
 import { DEV_ASSET, DEV_CATEGORY_SLUG, DEV_SPRITE_SVG } from "@/lib/dev-fixture"
 import { editorReducer, initialEditorState } from "@/lib/editor"
+import type { ExportFormat } from "@/lib/export"
 import { cacheAssetSvg } from "@/lib/osrsclans"
 
 const DEV_PRELOAD = process.env.NODE_ENV === "development"
@@ -32,6 +34,7 @@ export function EmojiEditor() {
     initialEditorState
   )
   const fontStatus = useTextFont(state.text.font)
+  const [exportFormat, setExportFormat] = useState<ExportFormat>("png")
 
   return (
     <div className="flex w-full flex-1 flex-col">
@@ -41,6 +44,7 @@ export function EmojiEditor() {
           <TabsTrigger value="canvas">Canvas</TabsTrigger>
           <TabsTrigger value="preview">Preview</TabsTrigger>
           <TabsTrigger value="chat">Chat</TabsTrigger>
+          <TabsTrigger value="export">Export</TabsTrigger>
         </TabsList>
         <TabsContent value="canvas">
           <EmojiCanvas state={state} dispatch={dispatch} />
@@ -50,6 +54,14 @@ export function EmojiEditor() {
         </TabsContent>
         <TabsContent value="chat" keepMounted>
           <EmojiChat state={state} dispatch={dispatch} />
+        </TabsContent>
+        <TabsContent value="export">
+          <EmojiExport
+            state={state}
+            fontStatus={fontStatus}
+            format={exportFormat}
+            onFormatChange={setExportFormat}
+          />
         </TabsContent>
       </Tabs>
       <div className="grid flex-1 grid-cols-1 content-start min-[900px]:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] min-[900px]:content-stretch">

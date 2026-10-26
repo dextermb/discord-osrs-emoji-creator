@@ -7,8 +7,8 @@ The editor state, the SVG layers, and the canvas size. Back to
 
 All editor state is in one reducer (`editorReducer` in `lib/editor.ts`). The
 reducer and its selectors are pure functions. `EmojiCanvas` and the controls
-read the state and send actions. A later "download" step can read the whole
-emoji from one place.
+read the state and send actions. The "Export" tab reads the whole emoji from
+one place, see [export.md](./export.md).
 
 ```
 EditorState
@@ -38,6 +38,8 @@ EmojiEditor ── useReducer(editorReducer) ──▶ state
   ├─ tab "Chat":    EmojiChat                  see chat.md
   │    ├─ split toggle ──────────────────────▶ setSplit
   │    └─ sections(state) ─▶ EmojiSection each ─▶ EmojiArtwork
+  ├─ tab "Export":  EmojiExport                see export.md
+  │    └─ hidden <svg> ─▶ EmojiArtwork ─▶ PNG / WebP files, ZIP
   ├─ LayerList ──────────────────────────────▶ select, setLocked
   ├─ "Add rectangle" (no rectangle) ─────────▶ addRect
   ├─ LayerPanel                                one panel for the selection
